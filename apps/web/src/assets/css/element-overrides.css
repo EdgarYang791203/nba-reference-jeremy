@@ -1,0 +1,16 @@
+/* Element Plus 覆蓋（計畫書 9D.5）：圓角 0、gold 主色、面板底色。
+   el-tabs 於自訂 RpgTabs 取代，不覆蓋 ink-bar。 */
+:root {
+    --el-border-radius-base: 0;
+    --el-border-radius-small: 0;
+    --el-border-radius-round: 0;
+
+    --el-color-primary: var(--c-gold);
+    --el-fill-color: var(--c-panel-2);
+    --el-fill-color-blank: var(--c-panel-2);
+    --el-border-color: var(--c-border-2);
+    --el-text-color-primary: var(--c-cream);
+    --el-text-color-regular: var(--c-cream);
+    --el-bg-color: var(--c-panel);
+    --el-bg-color-overlay: var(--c-panel);
+}

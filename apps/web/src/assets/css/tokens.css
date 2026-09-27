@@ -1,0 +1,18 @@
+/* 色彩 tokens（計畫書 9D.2）。暗版為預設主題；亮版（日間球場）另議，屆時只換這張變數表。 */
+:root,
+:root[data-theme='dark'] {
+    --c-bg: #1a2131;
+    --c-panel: #222b3e;
+    --c-panel-2: #1c2436;
+    --c-head: #2a3448;
+    --c-border: #c9b689;
+    --c-border-2: #8a7a55;
+    --c-cream: #eadfc3;
+    --c-muted: #9aa3b5;
+    --c-gold: #e2b94e;
+    --c-hp: #e0574a;
+    --c-sp: #5cb2ce;
+    --c-tag-blue: #a9c5e8;
+    --c-tag-brown: #4a3b29;
+    --c-track: #111827;
+}

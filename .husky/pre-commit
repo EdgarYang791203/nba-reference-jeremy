@@ -1,0 +1,8 @@
+# 9C.3 C3：gitleaks 防止 key 誤入 commit（未安裝時警告放行，CI 仍會掃）
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact || exit 1
+else
+  echo "[warn] gitleaks 未安裝，跳過本地掃描（CI 會擋）。安裝：winget install gitleaks"
+fi
+
+npx lint-staged

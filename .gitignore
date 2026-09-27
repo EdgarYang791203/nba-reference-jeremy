@@ -1,0 +1,23 @@
+# deps / build
+node_modules/
+.nuxt/
+.output/
+dist/
+.nitro/
+.cache/
+
+# env — 只允許 .env.example 進 repo（計畫書 9C.3 C2）
+.env
+.env.*
+!.env.example
+
+# test / logs
+coverage/
+*.log
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
