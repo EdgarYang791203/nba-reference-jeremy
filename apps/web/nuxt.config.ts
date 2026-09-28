@@ -12,9 +12,17 @@ export default defineNuxtConfig({
 
     app: {
         head: {
-            htmlAttrs: { lang: 'zh-Hant-TW', 'data-theme': 'dark' },
+            htmlAttrs: { lang: 'zh-Hant-TW', 'data-theme': 'dark', class: 'dark' },
             title: 'NBA 素材站',
-            meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }]
+            meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
+            // 首屏前先套 localStorage 的主題，避免亮版使用者看到暗版閃一下（composables/useTheme.ts 之後接手）
+            script: [
+                {
+                    innerHTML:
+                        "(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){var r=document.documentElement;r.dataset.theme=t;r.classList.toggle('dark',t==='dark');}}catch(e){}})();",
+                    tagPosition: 'head'
+                }
+            ]
         }
     },
 

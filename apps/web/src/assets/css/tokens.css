@@ -1,18 +1,65 @@
-/* 色彩 tokens（計畫書 9D.2）。暗版為預設主題；亮版（日間球場）另議，屆時只換這張變數表。 */
+/*
+ * 色彩 tokens——以 Design System「NBA 素材站」project/tokens.json 為準（取代計畫書 9D.2 舊色票）。
+ * 主題：AI Console 琥珀。暗版 = 夜間控制室（預設）；亮版 = 日間球場。兩者共用標記，只換變數表。
+ * --c-on-gold / --c-on-head 為文字對比補充：gold 底暗版配 bg 字、亮版配 cream 字；head 列亮版為深色記分板，文字用 bg。
+ */
 :root,
 :root[data-theme='dark'] {
-    --c-bg: #1a2131;
-    --c-panel: #222b3e;
-    --c-panel-2: #1c2436;
-    --c-head: #2a3448;
-    --c-border: #c9b689;
-    --c-border-2: #8a7a55;
-    --c-cream: #eadfc3;
-    --c-muted: #9aa3b5;
-    --c-gold: #e2b94e;
-    --c-hp: #e0574a;
+    --c-bg: #0b0e14;
+    --c-panel: #121722;
+    --c-panel-2: #0e1219;
+    --c-head: #161c28;
+    --c-border: #2f3a4d;
+    --c-border-2: #222b3a;
+    --c-cream: #e6e1d6;
+    --c-muted: #8a93a6;
+    --c-gold: #ffb000;
+    --c-orange: #ff6b00;
+    --c-hp: #ff5a5f;
     --c-sp: #5cb2ce;
     --c-tag-blue: #a9c5e8;
     --c-tag-brown: #4a3b29;
-    --c-track: #111827;
+    --c-track: #080a0f;
+    --c-shadow-hard: #000000;
+    --c-grid-line: #161c28;
+    --c-highlight: #ffb000;
+    --c-glow: rgb(255 176 0 / 0.2);
+    --c-glow-strong: rgb(255 176 0 / 0.45);
+
+    --c-on-gold: #0b0e14;
+    --c-on-head: #e6e1d6;
+    --c-on-tag-blue: #0b0e14;
+    --c-on-tag-brown: #e6e1d6;
+
+    color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+    --c-bg: #f4f1ea;
+    --c-panel: #ffffff;
+    --c-panel-2: #efeae0;
+    --c-head: #1a1f2b;
+    --c-border: #1a1f2b;
+    --c-border-2: #d8d2c4;
+    --c-cream: #1a1f2b;
+    --c-muted: #5e6470;
+    --c-gold: #e09b00;
+    --c-orange: #ff6b00;
+    --c-hp: #d9483b;
+    --c-sp: #2a7fb8;
+    --c-tag-blue: #2a7fb8;
+    --c-tag-brown: #4a3b29;
+    --c-track: #e6e0d3;
+    --c-shadow-hard: #1a1f2b;
+    --c-grid-line: #e4ded2;
+    --c-highlight: #b87f00;
+    --c-glow: rgb(224 155 0 / 0.13);
+    --c-glow-strong: rgb(224 155 0 / 0.35);
+
+    --c-on-gold: #1a1f2b;
+    --c-on-head: #f4f1ea;
+    --c-on-tag-blue: #ffffff;
+    --c-on-tag-brown: #fffbf2;
+
+    color-scheme: light;
 }

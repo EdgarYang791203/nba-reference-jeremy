@@ -24,6 +24,6 @@ describe('RpgTabs', () => {
 
     it('count 以 Press Start 2P 顯示', () => {
         const wrapper = mount(RpgTabs, { props: { tabs, modelValue: 'a' } });
-        expect(wrapper.find('.font-press').text()).toBe('2');
+        expect(wrapper.find('[data-testid="tab-count"]').text()).toBe('2');
     });
 });

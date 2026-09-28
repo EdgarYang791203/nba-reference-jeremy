@@ -1,6 +1,6 @@
 <!--
   @file RpgButton.vue
-  @description 按鈕（9D.4 Button）。主要 = gold 底 bg 字；次要 = panel-2 + 2px 金邊 + ▼ + 像素字；danger 供破壞性 action。
+  @description 按鈕（DS Button）。主要 = gold 底 on-gold 字（tag 13 bold）；次要 = panel-2 + 2px border + ▼ gold + 像素字；danger 供破壞性 action。
   @param variant - primary（預設）| secondary | danger
   @param type - button type，預設 'button'
   @param disabled
@@ -23,11 +23,11 @@ const emit = defineEmits<{
 const variantClass = computed(() => {
     switch (props.variant ?? 'primary') {
         case 'secondary':
-            return 'bg-panel-2 border-2 border-line text-gold font-pixel hover:bg-head';
+            return 'bg-panel-2 border-2 border-line text-gold font-pixel hover:border-gold';
         case 'danger':
-            return 'bg-hp text-cream font-bold hover:brightness-110';
+            return 'bg-hp text-white font-bold hover:brightness-110';
         default:
-            return 'bg-gold text-bg font-bold hover:brightness-110';
+            return 'bg-gold text-on-gold font-bold hover:brightness-110';
     }
 });
 
@@ -44,12 +44,18 @@ function onClick(event: MouseEvent) {
 <template>
     <button
         :type="type ?? 'button'"
-        class="inline-flex items-center gap-2 px-4 py-2 text-[13px] leading-none transition-[filter] disabled:cursor-not-allowed disabled:opacity-50"
+        class="inline-flex items-center gap-2 px-4 py-2 text-[13px] leading-none transition-[filter,border-color] disabled:cursor-not-allowed disabled:opacity-50"
         :class="variantClass"
         :disabled="isDisabled"
         @click="onClick"
     >
-        <span v-if="(variant ?? 'primary') === 'secondary'" aria-hidden="true">▼</span>
+        <span
+            v-if="(variant ?? 'primary') === 'secondary'"
+            class="font-press text-[10px]"
+            aria-hidden="true"
+        >
+            ▼
+        </span>
         <slot />
         <span v-if="loading" class="rpg-blink" aria-hidden="true">_</span>
     </button>
