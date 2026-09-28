@@ -1,0 +1,44 @@
+{
+    "name": "nba-material-site",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "packageManager": "pnpm@10.28.2",
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "dev": "pnpm --parallel -r dev",
+        "build": "pnpm -r build",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "typecheck": "pnpm -r typecheck",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write \"{apps,packages}/**/*.{ts,vue,css,json}\"",
+        "prepare": "husky",
+        "seed": "pnpm --filter @nba/api seed"
+    },
+    "devDependencies": {
+        "eslint": "^9.22.0",
+        "eslint-config-prettier": "^10.1.5",
+        "eslint-plugin-vue": "^9.33.0",
+        "husky": "^9.1.7",
+        "lint-staged": "^15.2.2",
+        "prettier": "^3.5.3",
+        "typescript": "^5.6.3",
+        "typescript-eslint": "^8.26.0",
+        "vitest": "^3.2.0"
+    },
+    "lint-staged": {
+        "*.{ts,mts,vue,js,mjs}": "eslint --fix"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "@parcel/watcher",
+            "esbuild",
+            "vue-demi",
+            "unrs-resolver"
+        ]
+    }
+}
