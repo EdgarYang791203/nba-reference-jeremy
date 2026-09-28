@@ -13,19 +13,24 @@ import {
     uniqueIndex
 } from 'drizzle-orm/pg-core';
 
-export const players = pgTable('players', {
-    id: serial('id').primaryKey(),
-    name: text('name').notNull(),
-    team: text('team').notNull(),
-    birthDate: date('birth_date').notNull(),
-    season: integer('season').notNull(),
-    active: boolean('active').notNull().default(true),
-    source: text('source', { enum: ['seed', 'api'] })
-        .notNull()
-        .default('seed'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow()
-});
+export const players = pgTable(
+    'players',
+    {
+        id: serial('id').primaryKey(),
+        name: text('name').notNull(),
+        team: text('team').notNull(),
+        birthDate: date('birth_date').notNull(),
+        season: integer('season').notNull(),
+        active: boolean('active').notNull().default(true),
+        source: text('source', { enum: ['seed', 'api'] })
+            .notNull()
+            .default('seed'),
+        createdAt: timestamp('created_at').notNull().defaultNow(),
+        updatedAt: timestamp('updated_at').notNull().defaultNow()
+    },
+    // seed / roster 以 (name, team) upsert（4.5）。TODO(M8): 交易換隊時的處理
+    (table) => [uniqueIndex('players_name_team_idx').on(table.name, table.team)]
+);
 
 export const banlist = pgTable('banlist', {
     playerId: integer('player_id')
@@ -80,6 +85,44 @@ export const runs = pgTable('runs', {
     startedAt: timestamp('started_at'),
     finishedAt: timestamp('finished_at')
 });
+
+/**
+ * 每日 run 的候選與原文（4.3 之外的補充，寫進 PR 假設清單）：
+ * Cloud Run 縮到零，送出 Batch 的 process 在 collect 時已不存在；keyQuotes 比對（9C.2 B4）需要原文，
+ * 故候選在 daily 階段落 DB，collect 以 customId 對回。
+ */
+export const runCandidates = pgTable(
+    'run_candidates',
+    {
+        id: serial('id').primaryKey(),
+        runDate: date('run_date')
+            .notNull()
+            .references(() => runs.date),
+        playerId: integer('player_id')
+            .notNull()
+            .references(() => players.id),
+        sourceUrl: text('source_url').notNull(),
+        sourceName: text('source_name'),
+        title: text('title').notNull(),
+        snippet: text('snippet'),
+        publishedAt: timestamp('published_at'),
+        articleText: text('article_text'),
+        imageUrl: text('image_url'),
+        score: integer('score'),
+        selected: boolean('selected').notNull().default(false),
+        /** `${date}:${id}`，Batch custom_id（4.5.1） */
+        customId: text('custom_id'),
+        status: text('status', { enum: ['candidate', 'submitted', 'inserted', 'rejected'] })
+            .notNull()
+            .default('candidate'),
+        rejectReason: text('reject_reason'),
+        createdAt: timestamp('created_at').notNull().defaultNow()
+    },
+    (table) => [
+        index('run_candidates_run_date_idx').on(table.runDate),
+        uniqueIndex('run_candidates_custom_id_idx').on(table.customId)
+    ]
+);
 
 export const config = pgTable('config', {
     key: text('key').primaryKey(),

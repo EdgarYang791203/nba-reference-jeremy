@@ -1,5 +1,10 @@
+export * from './config/schema';
 export * from './domain/season';
 export * from './domain/candidates';
 export * from './domain/url';
+export * from './domain/cost';
+export * from './domain/dates';
+export * from './domain/similarity';
+export * from './domain/fallback';
 export * from './llm/schemas';
 export * as schema from './db/schema';
