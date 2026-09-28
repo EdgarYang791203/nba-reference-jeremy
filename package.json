@@ -15,7 +15,8 @@
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write \"{apps,packages}/**/*.{ts,vue,css,json}\"",
-        "prepare": "husky"
+        "prepare": "husky",
+        "seed": "pnpm --filter @nba/api seed"
     },
     "devDependencies": {
         "eslint": "^9.22.0",

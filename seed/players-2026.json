@@ -1,0 +1,21 @@
+{
+    "_comment": "TODO: Hank 校對名單。2026-27 賽季 30 歲以上（以 2026-10-21 開打日計）現役球員 seed；生日與球隊依公開資料，可能有誤。正式名單於里程碑 8 由 roster job 更新。",
+    "season": 2026,
+    "players": [
+        { "name": "LeBron James", "team": "LAL", "birthDate": "1984-12-30" },
+        { "name": "Stephen Curry", "team": "GSW", "birthDate": "1988-03-14" },
+        { "name": "Kevin Durant", "team": "PHX", "birthDate": "1988-09-29" },
+        { "name": "James Harden", "team": "LAC", "birthDate": "1989-08-26" },
+        { "name": "Jimmy Butler", "team": "GSW", "birthDate": "1989-09-14" },
+        { "name": "Paul George", "team": "PHI", "birthDate": "1990-05-02" },
+        { "name": "Kawhi Leonard", "team": "LAC", "birthDate": "1991-06-29" },
+        { "name": "Damian Lillard", "team": "POR", "birthDate": "1990-07-15" },
+        { "name": "Kyrie Irving", "team": "DAL", "birthDate": "1992-03-23" },
+        { "name": "Jrue Holiday", "team": "POR", "birthDate": "1990-06-12" },
+        { "name": "Draymond Green", "team": "GSW", "birthDate": "1990-03-04" },
+        { "name": "Nikola Vucevic", "team": "CHI", "birthDate": "1990-10-24" },
+        { "name": "Rudy Gobert", "team": "MIN", "birthDate": "1992-06-26" },
+        { "name": "Anthony Davis", "team": "DAL", "birthDate": "1993-03-11" },
+        { "name": "Chris Paul", "team": "LAC", "birthDate": "1985-05-06" }
+    ]
+}
