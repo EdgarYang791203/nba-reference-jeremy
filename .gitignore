@@ -21,3 +21,6 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/settings.json
+
+# Claude Code 個人設定（專案共用的 settings.json 要進 repo）
+.claude/settings.local.json

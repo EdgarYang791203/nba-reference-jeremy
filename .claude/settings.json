@@ -1,0 +1,36 @@
+{
+    "permissions": {
+        "allow": [
+            "Bash(pnpm test)",
+            "Bash(pnpm test *)",
+            "Bash(pnpm lint)",
+            "Bash(pnpm lint:fix)",
+            "Bash(pnpm format)",
+            "Bash(pnpm audit)",
+            "Bash(pnpm audit *)",
+            "Bash(pnpm list *)",
+            "Bash(pnpm why *)",
+            "Bash(pnpm outdated *)",
+            "Bash(pnpm install)",
+            "Bash(pnpm install *)",
+            "Bash(pnpm add *)",
+            "Bash(pnpm build)",
+            "Bash(pnpm build *)",
+            "Bash(pnpm --filter * build)",
+            "Bash(pnpm --filter * test)",
+            "Bash(git add *)",
+            "Bash(git commit *)",
+            "Bash(git switch *)",
+            "Bash(git checkout -b *)",
+            "Bash(git push origin *)",
+            "Bash(git stash *)",
+            "Bash(gh pr create *)",
+            "Bash(gh pr comment *)",
+            "Bash(gh pr edit *)",
+            "Bash(gh issue create *)",
+            "Bash(gh issue comment *)",
+            "Bash(gh issue edit *)",
+            "Bash(gh label *)"
+        ]
+    }
+}
