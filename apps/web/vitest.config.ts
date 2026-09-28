@@ -4,6 +4,9 @@ import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
     plugins: [vue()],
+    define: {
+        __USE_MOCK_API__: 'false'
+    },
     resolve: {
         alias: {
             '~': fileURLToPath(new URL('./src', import.meta.url))
