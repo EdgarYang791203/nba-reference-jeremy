@@ -29,7 +29,7 @@ pnpm audit        # CI 必跑，high 以上失敗
 ## 本次環境建置範圍（2026-09-28 與 Hank 討論定案）
 
 1. **完整 monorepo 骨架**（里程碑 1）：`pnpm-workspace.yaml`、`apps/web`、`apps/api`、`packages/shared`、`vitest.workspace.ts`、`.env.example`、gitleaks pre-commit、CI。第一個 commit 只含骨架與 CI，能 `pnpm test` 全綠。
-2. 建在本 repo（`EdgarYang791203/nab-reference-jeremy`）根目錄，`docs/` 保留。
+2. 建在本 repo（`EdgarYang791203/nba-reference-jeremy`）根目錄，`docs/` 保留。
 3. 只做**架構與共用組件**，不實作業務功能、不呼叫任何 Claude API。
 
 ## 參考專案：`c:\dev\fbcom-frontend-web`

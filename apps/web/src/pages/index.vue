@@ -96,7 +96,7 @@ function demoDialog() {
         <p class="text-sm text-muted">
             規格見
             <AppLink
-                href="https://github.com/EdgarYang791203/nab-reference-jeremy"
+                href="https://github.com/EdgarYang791203/nba-reference-jeremy"
                 icon="external"
                 class="text-gold hover:brightness-110"
             >

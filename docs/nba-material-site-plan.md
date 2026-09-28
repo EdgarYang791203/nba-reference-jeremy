@@ -676,7 +676,7 @@ Design 畫布（暗版 AI Console 琥珀／亮版日間球場）已套入球場�
 
 ### 12.1 Day 1 步驟
 
-1. **建 repo 與初始 commit**（Hank 手動）：GitHub repo 為 `EdgarYang791203/nab-reference-jeremy`（公開），初始 commit 只 push `docs/nba-material-site-plan.md`、`README.md`、`CLAUDE.md`、`AGENTS.md`、`.gitignore`，讓 issue 樹與 Jules 可讀到規格；骨架檔案留給里程碑 1 的 PR。到 claude.ai/code 以 `/web-setup` 連接 GitHub；到 jules.google.com 安裝「Google Labs Jules」GitHub App 並勾選此 repo。建 label：`milestone:1`–`milestone:4`、`area:api|web|shared|infra`、`needs-review`、`spec:agreed`、`jules`。
+1. **建 repo 與初始 commit**（Hank 手動）：GitHub repo 為 `EdgarYang791203/nba-reference-jeremy`（公開），初始 commit 只 push `docs/nba-material-site-plan.md`、`README.md`、`CLAUDE.md`、`AGENTS.md`、`.gitignore`，讓 issue 樹與 Jules 可讀到規格；骨架檔案留給里程碑 1 的 PR。到 claude.ai/code 以 `/web-setup` 連接 GitHub；到 jules.google.com 安裝「Google Labs Jules」GitHub App 並勾選此 repo。建 label：`milestone:1`–`milestone:4`、`area:api|web|shared|infra`、`needs-review`、`spec:agreed`、`jules`。
 2. **Claude Code 開 issue 樹**：prompt 見 12.2。產出：每個里程碑一張 parent issue，功能一拆 sub-issue；每張 issue body 含「對應章節 / 範圍 / 驗收條件 / 不在範圍 / 假設」。Label：`milestone:N`、`area:api|web|shared|infra`、`needs-review`。
 3. **雙模型對抗 review 規格**：
    - 第一輪（Claude Code）：prompt 見 12.3a，直接編輯 issue body，並在每張 issue 留一則「審查摘要」comment。
