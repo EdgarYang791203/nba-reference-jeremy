@@ -24,3 +24,6 @@ Thumbs.db
 
 # Claude Code 個人設定（專案共用的 settings.json 要進 repo）
 .claude/settings.local.json
+
+# 本地 pglite 資料（DATABASE_URL=pglite://./.data/dev）
+.data/

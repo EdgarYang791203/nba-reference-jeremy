@@ -152,7 +152,8 @@ export function createMockLlm(options: MockLlmOptions = {}): MockLlm {
         async getBatch(batchId) {
             const batch = batches.get(batchId);
             if (!batch) {
-                throw new Error(`mock llm: unknown batch ${batchId}`);
+                // process 重啟後 in-memory batch 消失：視為已結束但無結果（collect 會把候選標 rejected）
+                return { status: 'ended', counts: { processing: 0, succeeded: 0, errored: 0, expired: 0, canceled: 0 }, endedAt: now() };
             }
             const results = batch.results ?? [];
             const succeeded = results.filter((r) => r.type === 'succeeded').length;
@@ -174,7 +175,10 @@ export function createMockLlm(options: MockLlmOptions = {}): MockLlm {
 
         async getBatchResults(batchId) {
             const batch = batches.get(batchId);
-            if (!batch || batch.status !== 'ended' || !batch.results) {
+            if (!batch) {
+                return [];
+            }
+            if (batch.status !== 'ended' || !batch.results) {
                 throw new Error(`mock llm: batch ${batchId} not ended`);
             }
             return batch.results;

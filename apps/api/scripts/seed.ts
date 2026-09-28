@@ -6,7 +6,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-import { createDb, type Db } from '../src/repos/db';
+import { resolveDbFromEnv, type Db } from '../src/repos/db';
 import { createRepos } from '../src/repos';
 
 const seedSchema = z.object({
@@ -46,7 +46,7 @@ if (isMain) {
         process.exit(1);
     }
     const seedPath = resolve(dirname(fileURLToPath(import.meta.url)), '../../../seed/players-2026.json');
-    seedPlayers(createDb(url), seedPath)
+    resolveDbFromEnv(url).then((db) => seedPlayers(db, seedPath))
         .then((r) => {
             console.log(`seed ${r.season}: ${r.total} players → inserted ${r.inserted}, updated ${r.updated}`);
             process.exit(0);

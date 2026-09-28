@@ -19,7 +19,8 @@ export function selectProvider(env: LlmEnv): LlmProvider {
     if (env.LLM_PROVIDER === 'anthropic' && env.ANTHROPIC_API_KEY) {
         return createAnthropicLlm(createAnthropicClient(env.ANTHROPIC_API_KEY));
     }
-    return createMockLlm();
+    // 本地 dev：Batch 送出即完成，讓 /jobs/daily → /collect 可以直接走完；測試自行注入 mock 控制生命週期
+    return createMockLlm({ autoEnd: true });
 }
 
 export function createLlmClient(

@@ -25,8 +25,8 @@ export const players = pgTable(
         source: text('source', { enum: ['seed', 'api'] })
             .notNull()
             .default('seed'),
-        createdAt: timestamp('created_at').notNull().defaultNow(),
-        updatedAt: timestamp('updated_at').notNull().defaultNow()
+        createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+        updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
     },
     // seed / roster 以 (name, team) upsert（4.5）。TODO(M8): 交易換隊時的處理
     (table) => [uniqueIndex('players_name_team_idx').on(table.name, table.team)]
@@ -38,7 +38,7 @@ export const banlist = pgTable('banlist', {
         .references(() => players.id),
     reason: text('reason'),
     bannedBy: text('banned_by'),
-    bannedAt: timestamp('banned_at').notNull().defaultNow()
+    bannedAt: timestamp('banned_at', { withTimezone: true }).notNull().defaultNow()
 });
 
 export const materials = pgTable(
@@ -51,7 +51,7 @@ export const materials = pgTable(
         date: date('date').notNull(),
         sourceUrl: text('source_url').notNull(),
         sourceName: text('source_name'),
-        publishedAt: timestamp('published_at'),
+        publishedAt: timestamp('published_at', { withTimezone: true }),
         titleZh: text('title_zh').notNull(),
         summaryZh: text('summary_zh').notNull(),
         keyQuotes: jsonb('key_quotes').$type<string[]>().notNull().default([]),
@@ -64,7 +64,7 @@ export const materials = pgTable(
         tokensIn: integer('tokens_in'),
         tokensOut: integer('tokens_out'),
         batchId: text('batch_id'),
-        createdAt: timestamp('created_at').notNull().defaultNow()
+        createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
     },
     (table) => [
         index('materials_player_created_idx').on(table.playerId, table.createdAt.desc()),
@@ -82,8 +82,8 @@ export const runs = pgTable('runs', {
     generatedCount: integer('generated_count'),
     batchId: text('batch_id'),
     error: text('error'),
-    startedAt: timestamp('started_at'),
-    finishedAt: timestamp('finished_at')
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    finishedAt: timestamp('finished_at', { withTimezone: true })
 });
 
 /**
@@ -105,7 +105,7 @@ export const runCandidates = pgTable(
         sourceName: text('source_name'),
         title: text('title').notNull(),
         snippet: text('snippet'),
-        publishedAt: timestamp('published_at'),
+        publishedAt: timestamp('published_at', { withTimezone: true }),
         articleText: text('article_text'),
         imageUrl: text('image_url'),
         score: integer('score'),
@@ -116,7 +116,7 @@ export const runCandidates = pgTable(
             .notNull()
             .default('candidate'),
         rejectReason: text('reject_reason'),
-        createdAt: timestamp('created_at').notNull().defaultNow()
+        createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
     },
     (table) => [
         index('run_candidates_run_date_idx').on(table.runDate),
@@ -140,5 +140,5 @@ export const usageLog = pgTable('usage_log', {
     cacheRead: integer('cache_read').notNull().default(0),
     cacheWrite: integer('cache_write').notNull().default(0),
     costUsd: real('cost_usd').notNull().default(0),
-    createdAt: timestamp('created_at').notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 });

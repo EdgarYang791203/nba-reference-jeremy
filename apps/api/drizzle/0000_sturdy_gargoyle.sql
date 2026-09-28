@@ -2,7 +2,7 @@ CREATE TABLE "banlist" (
 	"player_id" integer PRIMARY KEY NOT NULL,
 	"reason" text,
 	"banned_by" text,
-	"banned_at" timestamp DEFAULT now() NOT NULL
+	"banned_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "config" (
@@ -16,7 +16,7 @@ CREATE TABLE "materials" (
 	"date" date NOT NULL,
 	"source_url" text NOT NULL,
 	"source_name" text,
-	"published_at" timestamp,
+	"published_at" timestamp with time zone,
 	"title_zh" text NOT NULL,
 	"summary_zh" text NOT NULL,
 	"key_quotes" jsonb DEFAULT '[]'::jsonb NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE "materials" (
 	"tokens_in" integer,
 	"tokens_out" integer,
 	"batch_id" text,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "players" (
@@ -38,8 +38,8 @@ CREATE TABLE "players" (
 	"season" integer NOT NULL,
 	"active" boolean DEFAULT true NOT NULL,
 	"source" text DEFAULT 'seed' NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "run_candidates" (
@@ -50,7 +50,7 @@ CREATE TABLE "run_candidates" (
 	"source_name" text,
 	"title" text NOT NULL,
 	"snippet" text,
-	"published_at" timestamp,
+	"published_at" timestamp with time zone,
 	"article_text" text,
 	"image_url" text,
 	"score" integer,
@@ -58,7 +58,7 @@ CREATE TABLE "run_candidates" (
 	"custom_id" text,
 	"status" text DEFAULT 'candidate' NOT NULL,
 	"reject_reason" text,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "runs" (
@@ -68,8 +68,8 @@ CREATE TABLE "runs" (
 	"generated_count" integer,
 	"batch_id" text,
 	"error" text,
-	"started_at" timestamp,
-	"finished_at" timestamp
+	"started_at" timestamp with time zone,
+	"finished_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "usage_log" (
@@ -82,7 +82,7 @@ CREATE TABLE "usage_log" (
 	"cache_read" integer DEFAULT 0 NOT NULL,
 	"cache_write" integer DEFAULT 0 NOT NULL,
 	"cost_usd" real DEFAULT 0 NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 ALTER TABLE "banlist" ADD CONSTRAINT "banlist_player_id_players_id_fk" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
