@@ -10,13 +10,15 @@
         "./db/schema": "./src/db/schema.ts"
     },
     "scripts": {
-        "test": "vitest run"
+        "test": "vitest run",
+        "typecheck": "tsc --noEmit -p tsconfig.json"
     },
     "dependencies": {
         "drizzle-orm": "^0.45.2",
         "zod": "^3.24.0"
     },
     "devDependencies": {
+        "@types/node": "^20.19.43",
         "typescript": "^5.6.3",
         "vitest": "^3.2.0"
     }

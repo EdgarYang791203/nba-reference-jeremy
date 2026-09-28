@@ -27,6 +27,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      - run: pnpm typecheck
       - run: pnpm test
       # 9C.3 C5：high 以上漏洞讓 CI 失敗
       - run: pnpm audit --audit-level high

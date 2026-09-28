@@ -23,6 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 pnpm dev          # 同時起 Nuxt (3000) + Hono (8787)
 pnpm test         # Vitest 全 workspace（api 用 pglite 真 SQL）
 pnpm lint         # ESLint（lint:fix 才會改檔）
+pnpm typecheck    # tsc（api/shared）+ nuxt typecheck（web），CI 必跑
 pnpm audit --audit-level high   # CI 必跑
 pnpm seed         # seed/players-2026.json → players（需 DATABASE_URL）
 ```

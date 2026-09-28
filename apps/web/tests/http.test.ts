@@ -60,7 +60,7 @@ describe('createHttp', () => {
             hooks: {}
         });
 
-        const error = await http.get('/api/materials').catch((e) => e as ApiError);
+        const error = (await http.get('/api/materials').catch((e) => e)) as ApiError;
         expect(error).toBeInstanceOf(ApiError);
         expect(error.status).toBe(400);
         expect(error.code).toBe('VALIDATION');
