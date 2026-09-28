@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 「阿准的隨看隨想」NBA 素材庫網站。**SSOT 是 `docs/nba-material-site-plan.md`**，動工前先讀全文；任何與該文件衝突的實作決定，先在 PR 說明提出，不要靜默改規格；要改規格請同步改 md。
 
-三大功能：素材頁（每日排程抓 30+ 球員外電生成中文摘要卡）、待發佈文章頁、Issue 頁（Claude API 對話框）。依里程碑（計畫書第 9 章）逐步實作，目前進度：**里程碑 1（monorepo 骨架）尚未動工**。
+三大功能：素材頁（每日排程抓 30+ 球員外電生成中文摘要卡）、待發佈文章頁、Issue 頁（Claude API 對話框）。依里程碑（計畫書第 9 章）逐步實作，目前進度（2026-09-28）：**里程碑 1 完成；里程碑 2–3 主體完成（PR #1，develop → master）**；M4 的 Access / OIDC 驗證為 stub（production 一律 401）。UI tokens 以 Design System `tokens.json`（AI Console 琥珀）為準，取代 9D.2 舊色票。
 
 ## 已定案技術棧（計畫書第 2 章）
 
@@ -20,11 +20,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 常用指令（骨架建好後應成立）
 
 ```bash
-pnpm dev          # 同時起 Nuxt + Hono
-pnpm test         # Vitest 全 workspace
-pnpm lint         # ESLint --fix
-pnpm audit        # CI 必跑，high 以上失敗
+pnpm dev          # 同時起 Nuxt (3000) + Hono (8787)
+pnpm test         # Vitest 全 workspace（api 用 pglite 真 SQL）
+pnpm lint         # ESLint（lint:fix 才會改檔）
+pnpm audit --audit-level high   # CI 必跑
+pnpm seed         # seed/players-2026.json → players（需 DATABASE_URL）
 ```
+
+本地無 Neon 時：在 `apps/api` 用 `DATABASE_URL=pglite://./.data/dev`（啟動自動 migrate）+ `LLM_PROVIDER=mock`，
+`pnpm seed` → `POST /jobs/daily` → `POST /jobs/daily/collect` 即可在 `/materials` 看到真資料。
+前端不接 API 時用 `NUXT_PUBLIC_USE_MOCK_API=true`。
 
 ## 本次環境建置範圍（2026-09-28 與 Hank 討論定案）
 
@@ -62,6 +67,8 @@ utils/
 ### 沿用的工程紀律
 
 - 所有 v-html 一律走 `sanitizeHtml()`；不寫 inline `style=""`（動態值用 ref + `el.style.xxx` 在 client 設定）。
+- 前端 HTTP 一律經 `composables/useApi()`（axios 層 + envelope + 全域 loading/error）；後端回傳統一 `{ ok, data } | { ok:false, error }`。
+- 後端分層：routes 只驗證（zod）與呼叫 services；services 不直接下 query；Drizzle 只在 repos；每個 Claude 呼叫必經 guarded client（BudgetGuard + usage_log）。
 - ESLint + Prettier + husky + lint-staged pre-commit。
 - Commit message 規範：`feat: / fix: / docs: / style: / refactor: / perf: / test: / build: / chore:` + 半形空格 + 描述。
 
