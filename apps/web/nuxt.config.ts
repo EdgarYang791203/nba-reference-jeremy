@@ -59,6 +59,7 @@ export default defineNuxtConfig({
 
     // 部署 Cloudflare Pages 時以 NITRO_PRESET=cloudflare-pages 指定 preset；ISR 見計畫書 4.8 / 9A.5
     routeRules: {
+        '/': { redirect: '/materials' },
         '/materials/**': { isr: 3600 },
         '/articles/**': { isr: 600 }
     },

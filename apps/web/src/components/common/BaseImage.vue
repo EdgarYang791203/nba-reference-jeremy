@@ -35,9 +35,13 @@ const normalizedSrc = computed(() => {
     return '';
 });
 
-const resolvedSrc = computed(() =>
-    usingFallback.value ? (props.fallbackSrc ?? '') : normalizedSrc.value
-);
+const resolvedSrc = computed(() => {
+    // 無外連圖或外連圖失敗 → 走像素底圖（9E.3）
+    if (usingFallback.value || !normalizedSrc.value) {
+        return props.fallbackSrc ?? '';
+    }
+    return normalizedSrc.value;
+});
 
 function handleFailure(event?: Event) {
     if (!usingFallback.value && props.fallbackSrc) {
@@ -69,7 +73,7 @@ function syncImageStateFromDom() {
 }
 
 watch(normalizedSrc, (nextSrc) => {
-    visible.value = Boolean(nextSrc);
+    visible.value = Boolean(nextSrc || props.fallbackSrc);
     usingFallback.value = false;
 
     if (mounted.value) {
