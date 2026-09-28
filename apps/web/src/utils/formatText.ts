@@ -10,7 +10,7 @@ export function formatTextToHtml(text: string): string {
     let index = 0;
 
     while (index < text.length) {
-        const ch = text[index];
+        const ch = text.charAt(index);
 
         // 遇到數字，開始收集「數字段」
         if (/[0-9]/.test(ch)) {
@@ -18,8 +18,8 @@ export function formatTextToHtml(text: string): string {
             index++;
 
             while (index < text.length) {
-                const c = text[index];
-                const next = text[index + 1];
+                const c = text.charAt(index);
+                const next = text.charAt(index + 1);
 
                 if (/[0-9]/.test(c)) {
                     token += c;

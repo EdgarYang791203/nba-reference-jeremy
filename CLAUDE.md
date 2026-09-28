@@ -10,8 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 已定案技術棧（計畫書第 2 章）
 
-- **Monorepo**：pnpm workspaces — `apps/web`（Nuxt 3）、`apps/api`（Hono + TypeScript）、`packages/shared`（Drizzle schema、zod schema、純函式）
-- **前端**：Nuxt 3 + Tailwind + **Element Plus**（2026-09-28 定案；依 9D.5 覆蓋 CSS 變數：圓角 0、gold 主色、panel 底色），部署 Cloudflare Pages（ISR）
+- **Monorepo**：pnpm workspaces — `apps/web`（Nuxt 4）、`apps/api`（Hono + TypeScript）、`packages/shared`（Drizzle schema、zod schema、純函式）
+- **前端**：Nuxt 4（2026-09-29 由 Nuxt 3 升級，`srcDir: src` 不走 `app/`）+ Tailwind + **Element Plus**（2026-09-28 定案；依 9D.5 覆蓋 CSS 變數：圓角 0、gold 主色、panel 底色），部署 Cloudflare Pages（ISR）
 - **後端**：Hono，Docker → Cloud Run（min 0 / max 1）；DB 為 Neon Postgres + Drizzle ORM
 - **測試**：Vitest 全 workspace 統一（`vitest.workspace.ts` 於根目錄，`pnpm test` 全跑）+ Playwright 兩條 smoke
 - **登入**：Cloudflare Access（Google IdP，email 白名單）；排程：Cloud Scheduler OIDC → `/jobs/*`

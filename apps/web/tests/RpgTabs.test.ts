@@ -11,14 +11,14 @@ describe('RpgTabs', () => {
     it('選中頁籤顯示 ▶ 與 aria-selected', () => {
         const wrapper = mount(RpgTabs, { props: { tabs, modelValue: 'a' } });
         const buttons = wrapper.findAll('button');
-        expect(buttons[0].attributes('aria-selected')).toBe('true');
-        expect(buttons[0].text()).toContain('▶');
-        expect(buttons[1].attributes('aria-selected')).toBe('false');
+        expect(buttons[0]?.attributes('aria-selected')).toBe('true');
+        expect(buttons[0]?.text()).toContain('▶');
+        expect(buttons[1]?.attributes('aria-selected')).toBe('false');
     });
 
     it('點擊未選頁籤 emit update:modelValue', async () => {
         const wrapper = mount(RpgTabs, { props: { tabs, modelValue: 'a' } });
-        await wrapper.findAll('button')[1].trigger('click');
+        await wrapper.findAll('button')[1]?.trigger('click');
         expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['b']);
     });
 

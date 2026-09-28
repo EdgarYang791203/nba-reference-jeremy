@@ -17,7 +17,7 @@
 
 | 項目 | 決策 | 備註 |
 |---|---|---|
-| 前端 | Nuxt 3 + Tailwind，部署 **Cloudflare Pages**（Nitro `cloudflare-pages` preset） | 公開頁 ISR |
+| 前端 | Nuxt 4（2026-09-29 自 Nuxt 3 升級；`srcDir: src`）+ Tailwind，部署 **Cloudflare Pages**（Nitro `cloudflare-pages` preset） | 公開頁 ISR |
 | 後端 | **Hono + TypeScript**，Docker → **Cloud Run** | min 0 / max 1 instance |
 | 資料庫 | **Neon（Postgres）+ Drizzle ORM** | 免費方案，scale-to-zero；不用 Cloud SQL、不用 Firestore |
 | 登入 | **Cloudflare Access（Zero Trust）**，Google IdP，email 白名單（Hank + 阿准） | 不用 Firebase |
@@ -47,7 +47,7 @@ Cloud Run ──► GCS (每日 pg_dump 備份)
 ```
 .
 ├── apps/
-│   ├── web/            # Nuxt 3
+│   ├── web/            # Nuxt 4
 │   └── api/            # Hono, Dockerfile
 ├── packages/
 │   └── shared/         # Drizzle schema、zod schema、純函式（年齡、篩選、上限）
@@ -658,7 +658,7 @@ Design 畫布（暗版 AI Console 琥珀／亮版日間球場）已套入球場�
 ## 11. 給 Claude Code 的開工指引
 
 1. 先讀本文件全文，再讀 Design System artifact 的 `project/README.md` 與 `project/tokens.json`（token 名稱以該檔為準）。
-2. 依里程碑 1 建 monorepo：`pnpm-workspace.yaml`、`apps/web`（Nuxt 3）、`apps/api`（Hono）、`packages/shared`、`vitest.workspace.ts`、`.env.example`、`gitleaks` pre-commit。第一個 commit 只含骨架與 CI，能 `pnpm test` 全綠。
+2. 依里程碑 1 建 monorepo：`pnpm-workspace.yaml`、`apps/web`（Nuxt 4）、`apps/api`（Hono）、`packages/shared`、`vitest.workspace.ts`、`.env.example`、`gitleaks` pre-commit。第一個 commit 只含骨架與 CI，能 `pnpm test` 全綠。
 3. 每個里程碑一個分支、一個 PR；PR 描述列出對應本文件章節（例：`feat(api): 4.4 daily pipeline`）。
 4. 任何與本文件衝突的實作決定，先在 PR 說明提出，不要靜默改規格；本文件是 SSOT，改規格請同步改 md。
 5. 秘密與費用：本地一律用 dev key 與 Neon dev branch；未經 Hank 確認不得呼叫正式 Anthropic key，不得刪除或改動 `BudgetGuard` 邏輯。

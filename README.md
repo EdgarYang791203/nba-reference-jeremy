@@ -5,7 +5,7 @@
 ## 結構
 
 ```
-apps/web         Nuxt 3 前端（Cloudflare Pages, ISR）
+apps/web         Nuxt 4 前端（Cloudflare Pages, ISR）
 apps/api         Hono 後端（Docker → Cloud Run）
 packages/shared  Drizzle schema、zod schema、純函式（年齡、篩選、上限）
 docs/            規格文件

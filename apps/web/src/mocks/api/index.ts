@@ -47,7 +47,7 @@ export function resolveMock(
     params: Record<string, unknown> = {},
     body: unknown = undefined
 ): { matched: true; data: unknown } | { matched: false } {
-    const path = url.split('?')[0];
+    const path = url.split('?')[0] ?? url;
     for (const route of routes) {
         if (route.method !== method.toLowerCase()) {
             continue;
@@ -58,7 +58,7 @@ export function resolveMock(
         }
         const pathParams: Record<string, string> = {};
         route.keys.forEach((key, index) => {
-            pathParams[key] = decodeURIComponent(match[index + 1]);
+            pathParams[key] = decodeURIComponent(match[index + 1] ?? '');
         });
         return { matched: true, data: route.handler({ params, body, pathParams }) };
     }

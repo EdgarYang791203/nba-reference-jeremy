@@ -23,4 +23,4 @@
 
 ## 專案技術棧摘要
 
-pnpm workspaces monorepo：`apps/web`（Nuxt 3 + Tailwind + Element Plus）、`apps/api`（Hono + TypeScript，Drizzle + Neon Postgres）、`packages/shared`。Node 20+，只用 pnpm。測試 Vitest，`pnpm test` 全跑；lint 為 `pnpm lint`。
+pnpm workspaces monorepo：`apps/web`（Nuxt 4 + Tailwind + Element Plus）、`apps/api`（Hono + TypeScript，Drizzle + Neon Postgres）、`packages/shared`。Node 20+，只用 pnpm。測試 Vitest，`pnpm test` 全跑；lint 為 `pnpm lint`。

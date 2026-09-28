@@ -148,16 +148,18 @@ function getCompactVisiblePages(total: number, current: number): (number | '...'
 
     const sorted = [...pageSet].sort((a, b) => a - b);
     const result: (number | '...')[] = [];
-    for (let index = 0; index < sorted.length; index++) {
-        if (index > 0) {
-            const gap = sorted[index] - sorted[index - 1];
+    let prev: number | undefined;
+    for (const page of sorted) {
+        if (prev !== undefined) {
+            const gap = page - prev;
             if (gap === 2) {
-                result.push(sorted[index - 1] + 1);
+                result.push(prev + 1);
             } else if (gap > 2) {
                 result.push('...');
             }
         }
-        result.push(sorted[index]);
+        result.push(page);
+        prev = page;
     }
     return result;
 }

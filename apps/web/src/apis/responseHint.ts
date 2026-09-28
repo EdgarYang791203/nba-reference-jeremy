@@ -28,12 +28,13 @@ export function resolveErrorMessage(error: ApiError): string {
         const online = typeof navigator === 'undefined' ? true : navigator.onLine;
         return online ? '系統忙碌中，請稍後再試' : '請確認網路連線';
     }
-    if (error.status !== null && HTTP_STATUS_MESSAGES[error.status]) {
+    const statusHint = error.status !== null ? HTTP_STATUS_MESSAGES[error.status] : undefined;
+    if (statusHint) {
         // 後端有明確 code 與訊息時優先顯示（zod 驗證錯誤等）
         if (!GENERIC_CODES.has(error.code) && error.message) {
             return error.message;
         }
-        return HTTP_STATUS_MESSAGES[error.status];
+        return statusHint;
     }
     return error.message || '系統忙碌中，請稍後再試';
 }

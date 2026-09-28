@@ -46,7 +46,7 @@ describe('createHttp', () => {
 
         await expect(http.get('/api/materials/999')).rejects.toBeInstanceOf(ApiError);
         expect(onError).toHaveBeenCalledTimes(1);
-        expect(onError.mock.calls[0][0].code).toBe('NOT_FOUND');
+        expect(onError.mock.calls[0]?.[0].code).toBe('NOT_FOUND');
     });
 
     it('HTTP 4xx 帶後端 envelope 時取其 code/message', async () => {
