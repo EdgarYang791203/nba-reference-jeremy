@@ -92,3 +92,56 @@ curl -X POST http://localhost:8787/jobs/daily/collect
 1. **M4**：Scheduler OIDC 與 Access JWT 驗證落地，否則部署後 `/jobs/*` 打不進。
 2. **用 dev key 跑一次真實完整流程**，檢查階段 A 評分分佈與階段 B 摘要品質、keyQuotes 命中率，調 prompt。
 3. **M5**：Cloud Scheduler 兩條 job 接上，Cloud Run 環境變數設 `LLM_PROVIDER=anthropic`。
+
+---
+
+## 2026-10-11 追加盤點：三項發現與優化方向
+
+> 背景：本地（pglite + `LLM_PROVIDER=mock`）素材首頁每張卡標題相同；同日修了 Nuxt 4 升級後 `src/public` 404（`c489396`）與 CI `pnpm audit`（`40e6338`）。
+
+### 發現 1：素材卡每篇標題相同 — mock 階段 B 固定輸出，不是資料問題
+
+- **證據**：DB 20 篇的 `sourceUrl`、`keyQuotes` 各 20 種不同值；`titleZh`、`summaryZh` 只有 1 種（`llm/providers/mock-fixtures.ts` 的固定字串）。外電抓取為真，摘要為 mock。
+- **優化（低成本，建議做）**：mock 階段 B 的 `titleZh` 改為「[mock] + 候選標題前 20 字」，`summaryZh` 帶入 snippet 前 100 字，讓本地畫面可辨識、不再誤判為資料壞掉。需同步檢查 `apps/web` 與 `apps/api` 用到固定字串的測試。
+- 卡片右下「--」為瀏覽數佔位（schema 無 `views`），與此無關。
+
+### 發現 2：Google News 連結無法擷取原文 — 影響真實摘要品質（最重要）
+
+- **現況**：Google News RSS 的 `<link>` 是 `news.google.com/rss/articles/CBMi…` 編碼連結。它**不是 HTTP 302**，而是回一頁 Google News HTML 用 JavaScript 跳轉；RSS `<description>` 也只有標題 + 媒體名，`<source url>` 只有媒體網域。`sources/extract.ts` 用 `redirect: 'follow'` 拿到的是 Google 的殼頁，擷取不到正文，依 4.4 步驟 4 退回 RSS 摘要。
+- **證據**：Google News 來源的 `keyQuotes` 內容就是「標題 + 媒體名」；只有 Yahoo Sports 直連的那篇有真實 `imageUrl`。本地網路無 proxy、無 SSL 阻擋（curl 測 Google News RSS 與 Yahoo 文章皆 200、憑證驗證通過），問題純粹在連結格式。
+- **影響**：接真 API 後，Google News 來源（候選中的多數）的階段 B 只能依一行標題生成 → 摘要空泛、`keyQuotes` 子字串比對幾乎必定剔除、無圖片；階段 A 評分也只看得到標題。**在解決前，真 API 測試的品質結論不可信。**
+- **優化方案**：
+
+  | 方案 | 做法 | 優點 | 缺點 |
+  |---|---|---|---|
+  | A 解碼連結 | `CBMi…` 為 base64，舊格式直接含原始 URL；新格式需呼叫 Google 內部 `batchexecute` 端點取解碼參數 | 保留 Google News 覆蓋度 | 非官方、可能隨時失效，需 fallback 與快取 |
+  | B 固定媒體 RSS 為主 | 擴充 `config.sources`（ESPN / CBS / HoopsHype / Yahoo 已有），Google News 候選標記 `extractable=false`，階段 A 排除或降權 | 穩定、有正文、有圖 | 覆蓋度依賴來源清單；The Athletic、NBA.com 等無公開 RSS |
+  | C 混合（建議） | 先試 A 解碼；解碼或擷取失敗的 Google News 候選**不送階段 B**，只留作標題線索 | 兼顧覆蓋與品質 | 工時最高（約 0.5–1 天含測試） |
+
+- **規格影響**：計畫書 4.4 步驟 4「失敗只用 RSS 摘要」需改為「無正文者不進階段 B」，**需 Hank 同意後改 md**。
+- **配套**：`run_candidates` 新增 `extractStatus`（`ok` / `rss_only` / `failed`），讓 `runs` 與之後的 `/api/usage` 能看到擷取成功率。
+
+### 發現 3：30 歲規則 — 已正確執行，優化重點在維護性
+
+- **現況**：`services/players.ts` 以 `isEligible(birthDate, cutoff, config.minAge=30)` 過濾，`cutoff` 為賽季開打日（`config.seasonOpening` 預設 10/21；休賽季看下賽季），再扣 ban list。99 → 20 的篩選是在這份名單的外電上做（score ≥ 6、每人 ≤ 2、上限 20）。
+- **優化**：
+  1. `seed/players-2026.json` 為手動維護，上線前抽查 5 人 `birthDate` 與球隊；每季更新 `config.seasonOpening`。
+  2. `GET /api/players` 回應加上本次適用的 `cutoff` 與人數，方便 Hank 核對名單。
+  3. 補邊界測試：cutoff 當日生日視為滿 30（`>=`）；休賽季 6–9 月切換。
+  4. 動態名單（M8）維持延後。
+
+## 只做功能一的優先序（→ 部署 → 使用者測試）
+
+**明確不做**：功能二（文章產生、模仿文筆）、功能三（Issue 對話）、M8 動態名單、Live2D、Usage 頁籤（D7）。
+
+| 序 | 項目 | 為什麼排這裡 | 需要 Hank | 預估 |
+|---|---|---|---|---|
+| P0 | 合併 PR #1 | 已 CI 全綠，待手動 merge | 按合併 | — |
+| P1 | 發現 2 方案 C + `extractStatus`；發現 1 的 mock 文案 | 決定真 API 測試結果是否有意義 | 同意 4.4 步驟 4 規格微調 | 0.5–1 天 |
+| P2 | 用 dev key 本地跑一次真流程（`LLM_PROVIDER=anthropic` + pglite） | 驗證階段 A 分佈、階段 B 品質、keyQuotes 命中率、成本；調 prompt | 提供 dev workspace key（E1：$5 限額） | 0.5 天 |
+| P3 | M4 最小集：A2 Access JWT、A3 Scheduler OIDC（正反例測試）、A5 origin header、A6 CORS 讀 config | 不做則部署後 `/jobs/*` 一律 401 | 提供 Cloudflare team domain、GCP project、SA email | 0.5–1 天 |
+| P4 | 部署：Neon prod branch + Secret Manager（C1）、Cloud Run（E2）、Cloud Scheduler 05:00 與每 30 分鐘（M5、E6）、Cloudflare Pages（web）、Anthropic spend limit（E1）、GCP budget alert（E3） | 第一版先手動 `gcloud` 部署，GitHub Actions WIF（C4）延後 | GCP / Cloudflare / Neon 帳號操作 | 1 天 |
+| P5 | 使用者測試 1–2 週 | 每日看 `runs`、`usage_log` 成本、擷取成功率；收摘要品質回饋 | 試用與回饋 | — |
+
+**P1 排在 P2 之前的理由**：目前 Google News 候選佔多數，不先解連結問題，P2 跑出來的品質數據會低估整條 pipeline，也會浪費 dev key 額度。
+**P4 的最小安全集**：素材頁本身公開不需 Access；A1 Access 只需保護 `/jobs/*` 以外的受保護路由，功能一階段可只設 Scheduler OIDC 與 origin header。
