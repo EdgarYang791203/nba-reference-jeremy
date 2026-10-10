@@ -22,13 +22,14 @@ const emit = defineEmits<{
         :is="clickable ? 'button' : 'div'"
         :type="clickable ? 'button' : undefined"
         class="flex w-full items-center justify-between py-2"
-        :class="clickable ? 'hover:bg-head' : ''"
+        :class="clickable ? 'group hover:bg-head' : ''"
         @click="clickable ? emit('click') : undefined"
     >
-        <span class="text-base text-cream">{{ label }}</span>
+        <!-- hover 底為 head（亮版是深咖啡，與 cream 文字同色），文字一律切到 on-head 才看得見 -->
+        <span class="text-base text-cream group-hover:text-on-head">{{ label }}</span>
         <span class="flex items-center gap-2">
-            <span class="font-pixel text-2xl leading-none text-cream">{{ value }}</span>
-            <span v-if="clickable" class="text-muted" aria-hidden="true">▶</span>
+            <span class="font-pixel text-2xl leading-none text-cream group-hover:text-on-head">{{ value }}</span>
+            <span v-if="clickable" class="text-muted group-hover:text-on-head" aria-hidden="true">▶</span>
         </span>
     </component>
 </template>

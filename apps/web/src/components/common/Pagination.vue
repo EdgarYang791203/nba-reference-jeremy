@@ -69,7 +69,8 @@ const defaultClasses: Required<PaginationClasses> = {
     pageButton:
         'h-10 min-w-10 px-2 flex items-center justify-center font-pixel text-lg transition-colors',
     pageActive: 'bg-gold text-bg',
-    pageInactive: 'text-muted hover:bg-head hover:text-cream',
+    // hover 底為 head：文字用 on-head（亮版 head 與 cream 同為深咖啡，用 cream 會看不見）
+    pageInactive: 'text-muted hover:bg-head hover:text-on-head',
     inputWrapper: 'flex items-center gap-2 font-pixel text-lg text-cream',
     input: 'w-12 border-2 border-line-2 bg-track py-1 text-center text-cream outline-none focus:border-gold',
     separator: 'text-muted',

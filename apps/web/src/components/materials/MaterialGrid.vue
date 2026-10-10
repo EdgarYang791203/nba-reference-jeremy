@@ -55,13 +55,13 @@ const { visibleItems, hasMore, showMore } = usePagination(source, props.pageSize
             <button
                 v-if="hasMore"
                 type="button"
-                class="flex items-center gap-2.5 border-2 border-gold bg-panel-2 px-6 py-3 font-mono text-gold hover:bg-head"
+                class="group flex items-center gap-2.5 border-2 border-gold bg-panel-2 px-6 py-3 font-mono text-gold hover:bg-head"
                 data-testid="load-more"
                 @click="showMore"
             >
                 <span class="font-press text-[10px]" aria-hidden="true">▼</span>
                 <span class="font-pixel text-xl">載入更多素材</span>
-                <span class="text-xs text-muted">--limit {{ pageSize }}</span>
+                <span class="text-xs text-muted group-hover:text-on-head">--limit {{ pageSize }}</span>
             </button>
             <span class="text-xs text-muted" data-testid="shown-count">
                 已顯示 {{ visibleItems.length }} / {{ items.length }} 篇
