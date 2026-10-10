@@ -8,7 +8,7 @@ import { computed } from 'vue';
 import { useTheme } from '~/composables/useTheme';
 
 const route = useRoute();
-const { theme, toggleTheme } = useTheme();
+const { toggleTheme } = useTheme();
 
 const navItems = computed(() => [
     { to: '/materials', label: '素材庫' },
@@ -87,11 +87,14 @@ function isActive(to: string) {
                     class="flex items-center gap-1.5 border-2 border-line bg-panel-2 px-2 py-1.5 text-xs font-bold text-cream hover:border-gold"
                     @click="toggleTheme"
                 >
+                    <!-- 夜／日文案同時輸出、由 html.dark 決定顯示，HTML 不依賴使用者主題（hydration 不換字） -->
                     <span class="font-press text-[10px] text-gold" aria-hidden="true">
-                        {{ theme === 'dark' ? '☾' : '☀' }}
+                        <span class="hidden dark:inline">☾</span><span class="dark:hidden">☀</span>
                     </span>
-                    {{ theme === 'dark' ? '暗' : '亮' }}
-                    <span class="font-medium text-muted">/ {{ theme === 'dark' ? '亮' : '暗' }}</span>
+                    <span class="hidden dark:inline">暗</span><span class="dark:hidden">亮</span>
+                    <span class="font-medium text-muted">
+                        / <span class="hidden dark:inline">亮</span><span class="dark:hidden">暗</span>
+                    </span>
                 </button>
 
                 <!-- TODO(M4): Cloudflare Access（Google IdP）登入入口 -->

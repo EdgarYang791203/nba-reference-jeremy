@@ -10,7 +10,6 @@
 import { computed } from 'vue';
 import type { Player } from '~/types/api';
 import { ageFrom, formatDate } from '~/utils/date';
-import { useTheme } from '~/composables/useTheme';
 import RpgWindow from '~/components/ui/RpgWindow.vue';
 import RpgTag from '~/components/ui/RpgTag.vue';
 import StatBar from '~/components/ui/StatBar.vue';
@@ -37,10 +36,6 @@ const emit = defineEmits<{
     'row-click': [key: 'total' | 'recent' | 'used' | 'drafts' | 'sources'];
 }>();
 
-const { theme } = useTheme();
-const portrait = computed(() =>
-    theme.value === 'light' ? '/pixel/portrait-light-280.png' : '/pixel/portrait-dark-280.png'
-);
 
 const title = computed(() =>
     props.player ? `NBA_FEED — ${props.player.name} [player_status.v1]` : 'NBA_FEED — ALL [player_status.v1]'
@@ -64,10 +59,18 @@ const metaLine = computed(() => {
             <div
                 class="h-[140px] w-[140px] shrink-0 overflow-hidden border-2 border-gold bg-panel-2 portrait-glow"
             >
+                <!-- 夜／日版同時輸出，由 html.dark 決定顯示；隱藏那張 lazy 不下載，hydration 不換圖 -->
                 <img
-                    :src="portrait"
+                    src="/pixel/portrait-dark-280.png"
                     alt="通用像素球員頭像（非特定球員）"
-                    class="pixel-asset block h-[136px] w-[136px] object-cover"
+                    class="pixel-asset hidden h-[136px] w-[136px] object-cover dark:block"
+                    loading="lazy"
+                    decoding="async"
+                />
+                <img
+                    src="/pixel/portrait-light-280.png"
+                    alt="通用像素球員頭像（非特定球員）"
+                    class="pixel-asset block h-[136px] w-[136px] object-cover dark:hidden"
                     loading="lazy"
                     decoding="async"
                 />
