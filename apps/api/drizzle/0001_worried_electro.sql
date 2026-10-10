@@ -1,0 +1,1 @@
+ALTER TABLE "run_candidates" ADD COLUMN "extract_status" text DEFAULT 'rss_only' NOT NULL;

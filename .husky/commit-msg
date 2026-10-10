@@ -1,0 +1,5 @@
+# Commit 規範：type: 描述（沿用 fbcom 慣例）
+if ! grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|chore)(\([a-z0-9-]+\))?: .+' "$1"; then
+  echo "commit message 需符合：feat|fix|docs|style|refactor|perf|test|build|chore(scope?): 描述"
+  exit 1
+fi

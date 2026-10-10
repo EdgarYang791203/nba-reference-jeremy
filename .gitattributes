@@ -1,0 +1,8 @@
+# Live2D 模型二進位（9F.3）
+*.moc binary
+*.moc3 binary
+*.mtn binary
+
+# 像素素材
+*.png binary
+*.jpg binary
