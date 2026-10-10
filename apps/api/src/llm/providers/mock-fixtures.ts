@@ -11,6 +11,18 @@ export const MOCK_SUMMARY_ZH =
 
 export const MOCK_TAGS = ['nba', 'veteran', 'preseason'];
 
+/** 本地畫面可辨識的 mock 標題：帶原標題前段（materialGenSchema titleZh ≤ 40 字） */
+export function mockTitleFor(originalTitle: string | null | undefined): string {
+    const head = (originalTitle ?? '').replace(/\s+/g, ' ').trim().slice(0, 30);
+    return head ? `[mock] ${head}` : MOCK_TITLE_ZH;
+}
+
+/** mock 摘要前綴來源與標題，正文沿用固定段落以滿足 summaryZh ≥ 200 字 */
+export function mockSummaryFor(source: string | null | undefined, originalTitle: string | null | undefined): string {
+    const prefix = `[mock 摘要｜來源：${source || '未知'}｜原題：${(originalTitle ?? '').slice(0, 60)}] `;
+    return (prefix + MOCK_SUMMARY_ZH).slice(0, 700);
+}
+
 /** 取原文第一句（供 keyQuotes 預設通過子字串比對） */
 export function firstSentence(text: string): string {
     const cleaned = text.replace(/\s+/g, ' ').trim();

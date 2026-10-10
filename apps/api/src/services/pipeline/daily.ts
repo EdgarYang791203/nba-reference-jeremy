@@ -4,7 +4,7 @@
  * 任何例外（含 BudgetGuard / killSwitch）→ failed 並記 error；路由仍回 200 避免 Scheduler 重試燒錢。
  */
 import { fallbackSelect, filterBanned, scoreOf, selectCandidates, taipeiDate } from '@nba/shared';
-import { collectCandidates } from '../../sources/candidates';
+import { collectCandidates, summarizeExtract, type ExtractStats } from '../../sources/candidates';
 import { createPlayersService } from '../players';
 import { scoreCandidates } from './stageA';
 import { buildBatchRequests, customIdFor } from './stageB';
@@ -17,6 +17,8 @@ export interface DailyResult {
     candidateCount?: number;
     generatedCount?: number;
     error?: string | null;
+    /** 擷取統計：ok / rssOnly / failed（failed 不進階段 A/B） */
+    extract?: ExtractStats;
 }
 
 export async function runDaily(ctx: PipelineCtx, options: { date?: string } = {}): Promise<DailyResult> {
@@ -59,7 +61,7 @@ export async function runDaily(ctx: PipelineCtx, options: { date?: string } = {}
             concurrency: ctx.sources?.concurrency,
             logger: ctx.logger
         });
-        const candidates = await repos.candidates.insertMany(
+        const allCandidates = await repos.candidates.insertMany(
             raw.map((c) => ({
                 runDate: date,
                 playerId: c.playerId,
@@ -69,14 +71,27 @@ export async function runDaily(ctx: PipelineCtx, options: { date?: string } = {}
                 snippet: c.snippet,
                 publishedAt: c.publishedAt,
                 articleText: c.articleText,
-                imageUrl: c.imageUrl
+                imageUrl: c.imageUrl,
+                extractStatus: c.extractStatus
             }))
         );
-        await repos.runs.patch(date, { status: 'generating', candidateCount: candidates.length });
+        await repos.runs.patch(date, { status: 'generating', candidateCount: allCandidates.length });
+
+        // 4b. 無可用文字者（Google News 還原失敗、摘要只有標題）不進階段 A/B，標 rejected 留紀錄
+        const extract = summarizeExtract(allCandidates);
+        const noText = allCandidates.filter((c) => c.extractStatus === 'failed');
+        if (noText.length) {
+            await repos.candidates.patchMany(
+                noText.map((c) => c.id),
+                { status: 'rejected', rejectReason: 'no_text' }
+            );
+        }
+        const candidates = allCandidates.filter((c) => c.extractStatus !== 'failed');
+        ctx.logger.info(`[daily] ${date}: extract ok=${extract.ok} rss_only=${extract.rssOnly} failed=${extract.failed}`);
 
         if (!candidates.length) {
             await repos.runs.patch(date, { status: 'done', generatedCount: 0, finishedAt: ctx.now() });
-            return { date, status: 'done', candidateCount: 0, generatedCount: 0 };
+            return { date, status: 'done', candidateCount: allCandidates.length, generatedCount: 0, extract };
         }
 
         // 5. 階段 A
@@ -107,7 +122,7 @@ export async function runDaily(ctx: PipelineCtx, options: { date?: string } = {}
 
         if (!verified.length) {
             await repos.runs.patch(date, { status: 'done', generatedCount: 0, finishedAt: ctx.now(), error: runError });
-            return { date, status: 'done', candidateCount: candidates.length, generatedCount: 0, error: runError };
+            return { date, status: 'done', candidateCount: allCandidates.length, generatedCount: 0, error: runError, extract };
         }
 
         await repos.candidates.markSelected(
@@ -123,8 +138,8 @@ export async function runDaily(ctx: PipelineCtx, options: { date?: string } = {}
             items: buildBatchRequests(date, selectedRows, config)
         });
         await repos.runs.patch(date, { status: 'collecting', batchId, generatedCount: selectedRows.length, error: runError });
-        ctx.logger.info(`[daily] ${date}: ${candidates.length} candidates → ${selectedRows.length} submitted (batch ${batchId})`);
-        return { date, status: 'collecting', candidateCount: candidates.length, generatedCount: selectedRows.length, error: runError };
+        ctx.logger.info(`[daily] ${date}: ${allCandidates.length} candidates (${candidates.length} with text) → ${selectedRows.length} submitted (batch ${batchId})`);
+        return { date, status: 'collecting', candidateCount: allCandidates.length, generatedCount: selectedRows.length, error: runError, extract };
     } catch (error) {
         const message = (error as Error).message.slice(0, 500);
         ctx.logger.error(`[daily] ${date} failed: ${message}`);

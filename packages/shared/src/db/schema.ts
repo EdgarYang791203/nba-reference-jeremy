@@ -108,6 +108,10 @@ export const runCandidates = pgTable(
         publishedAt: timestamp('published_at', { withTimezone: true }),
         articleText: text('article_text'),
         imageUrl: text('image_url'),
+        /** ok=有正文；rss_only=僅 RSS 摘要；failed=無可用文字（不進階段 A/B） */
+        extractStatus: text('extract_status', { enum: ['ok', 'rss_only', 'failed'] })
+            .notNull()
+            .default('rss_only'),
         score: integer('score'),
         selected: boolean('selected').notNull().default(false),
         /** `${date}:${id}`，Batch custom_id（4.5.1） */

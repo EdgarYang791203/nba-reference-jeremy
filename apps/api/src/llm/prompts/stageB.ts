@@ -20,6 +20,8 @@ export interface StageBArticleInput {
     source: string;
     url: string;
     published: string | null;
+    /** RSS 原標題：擷取正文通常不含標題，補給模型當脈絡 */
+    title?: string;
     text: string;
 }
 
@@ -31,7 +33,8 @@ export function buildStageBUser(article: StageBArticleInput): string {
     const attrs = [
         `source="${escapeAttr(article.source)}"`,
         `url="${escapeAttr(article.url)}"`,
-        `published="${escapeAttr(article.published ?? '')}"`
+        `published="${escapeAttr(article.published ?? '')}"`,
+        ...(article.title ? [`title="${escapeAttr(article.title)}"`] : [])
     ].join(' ');
     // 正文內若出現 </article> 會提前結束區塊，先中和
     const body = article.text.replace(/<\/article>/gi, '&lt;/article&gt;');

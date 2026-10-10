@@ -5,7 +5,7 @@
  * - stageB：回固定摘要，keyQuotes = 原文第一句（讓子字串比對預設通過）。
  * - queue(tag, fn) 一次性覆寫、setDefault(tag, fn) 永久覆寫；endBatch/failBatch 控制 batch。
  */
-import { MOCK_SUMMARY_ZH, MOCK_TAGS, MOCK_TITLE_ZH, firstSentence } from './mock-fixtures';
+import { MOCK_TAGS, firstSentence, mockSummaryFor, mockTitleFor } from './mock-fixtures';
 import type {
     BatchRequestItem,
     BatchResultItem,
@@ -69,12 +69,20 @@ export function defaultStageAResponder(params: CompleteParams): string {
     return JSON.stringify({ items });
 }
 
+function articleAttr(user: string, name: string): string | null {
+    const open = user.match(/<article\b[^>]*>/);
+    const attr = open?.[0].match(new RegExp(`\\b${name}="([^"]*)"`));
+    return attr ? attr[1].replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&') : null;
+}
+
 export function defaultStageBResponder(params: CompleteParams): string {
     const article = extractBlock(params.user, 'article') ?? '';
     const quote = firstSentence(article);
+    const title = articleAttr(params.user, 'title');
+    const source = articleAttr(params.user, 'source');
     return JSON.stringify({
-        titleZh: MOCK_TITLE_ZH,
-        summaryZh: MOCK_SUMMARY_ZH,
+        titleZh: mockTitleFor(title),
+        summaryZh: mockSummaryFor(source, title),
         keyQuotes: quote ? [quote] : [],
         tags: MOCK_TAGS
     });

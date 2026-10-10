@@ -44,6 +44,10 @@ export const appConfigSchema = z.object({
     /** 原文截斷（≈ 6,000 tokens，4.5.1 階段 B） */
     articleMaxChars: z.number().int().positive().default(24_000),
     stageAChunkSize: z.number().int().positive().default(150),
+    /** 原文擷取失敗時，RSS 摘要至少要有這麼多字才視為可用（否則 extractStatus=failed，不進階段 A/B） */
+    minSnippetChars: z.number().int().nonnegative().default(160),
+    /** Google News 連結還原（非官方介面）；關閉時 Google News 候選一律 failed */
+    googleNewsResolve: z.boolean().default(true),
 
     // ── 模型與費率（4.5.1 / 4.5.2） ──
     models: z

@@ -6,6 +6,7 @@ import { runDaily } from '../src/services/pipeline/daily';
 import { runCollect } from '../src/services/pipeline/collect';
 import { STAGE_B_SYSTEM, buildStageBUser } from '../src/llm/prompts/stageB';
 import { MOCK_SUMMARY_ZH } from '../src/llm/providers/mock-fixtures';
+import type { FetchLike } from '../src/sources/rss';
 
 let testDb: TestDb;
 
@@ -46,13 +47,47 @@ function feeds() {
     });
 }
 
-async function setup(options: { config?: Record<string, unknown>; now?: () => Date } = {}) {
+async function setup(options: { config?: Record<string, unknown>; now?: () => Date; fetch?: FetchLike } = {}) {
     let clock = START;
     const now = options.now ?? (() => clock);
-    const ctx = await createTestApp({ db: testDb.db, fetch: feeds(), now, config: { sources: [], ...options.config } });
+    const ctx = await createTestApp({ db: testDb.db, fetch: options.fetch ?? feeds(), now, config: { sources: [], ...options.config } });
     await ctx.repos.players.upsertByNameTeam([lebron, curry]);
     return { ...ctx, advance: (ms: number) => (clock = new Date(clock.getTime() + ms)) };
 }
+
+describe('daily：無可用文字候選（4.4 步驟 4 補充）', () => {
+    it('Google News 還原失敗者 extractStatus=failed → rejected/no_text，不進階段 A，其餘照常送 Batch', async () => {
+        const GN = 'https://news.google.com/rss/articles/CBMiiwFBVV95cUxOb3Vvc0ZYNVBHSlI5X2ZWOURHUTRFMU9EcG9jQ193dGEwdVBo?oc=5';
+        const fetchFn = fakeFetch({
+            'https://news.google.com/rss/search?q=%22LeBron': rssXml([
+                { title: 'LeBron James talks season 24 plans', link: 'https://a.com/l1', description: 'LeBron James', pubDate: PUB },
+                { title: 'LeBron James injury update from the Lakers', link: GN, description: 'LeBron James injury update from the Lakers  ESPN', pubDate: PUB, source: 'ESPN' }
+            ]),
+            'https://news.google.com/rss/search?q=%22Stephen': rssXml([]),
+            'https://a.com/l1': articleHtml('LeBron', LONG),
+            'https://news.google.com/articles/': { status: 404 }
+        });
+        const { services, repos, llm } = await setup({ fetch: fetchFn });
+        const ctx = await services.pipelineCtx();
+
+        const result = await runDaily(ctx);
+        expect(result.status).toBe('collecting');
+        expect(result.candidateCount).toBe(2);
+        expect(result.generatedCount).toBe(1);
+        expect(result.extract).toEqual({ ok: 1, rssOnly: 0, failed: 1 });
+
+        const rows = await repos.candidates.listByRun(result.date);
+        const failed = rows.find((r) => r.sourceUrl.startsWith('https://news.google.com/'))!;
+        expect(failed.extractStatus).toBe('failed');
+        expect(failed.status).toBe('rejected');
+        expect(failed.rejectReason).toBe('no_text');
+        expect(failed.selected).toBe(false);
+
+        const stageA = llm.calls.find((c) => c.tag === 'stageA')!;
+        expect(stageA.user).toContain('season 24 plans');
+        expect(stageA.user).not.toContain('injury update');
+    });
+});
 
 describe('daily（4.4 步驟 1–6）', () => {
     it('happy path：候選落 DB → 階段 A → Batch 送出 → collecting；同日重跑 skipped', async () => {
@@ -159,7 +194,8 @@ describe('collect（4.4 步驟 7–8）', () => {
         const materials = await repos.materials.list({ status: 'all' });
         expect(materials.total).toBe(1);
         expect(materials.items[0].sourceUrl).toBe(ok1.sourceUrl);
-        expect(materials.items[0].summaryZh).toBe(MOCK_SUMMARY_ZH);
+        expect(materials.items[0].summaryZh).toContain(MOCK_SUMMARY_ZH);
+        expect(materials.items[0].titleZh).toMatch(/^\[mock\] /);
         expect(materials.items[0].keyQuotes).toEqual(['Sentence 1 about the veteran and the upcoming season.']);
         expect(materials.items[0].batchId).toBe('mock-batch-1');
 

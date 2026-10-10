@@ -9,6 +9,8 @@ export interface RssItem {
     publishedAt: Date | null;
     /** feed 提供的圖片（enclosure / media:content） */
     imageUrl: string | null;
+    /** RSS 2.0 <source> 的媒體名稱（Google News 聚合 feed 會帶原始媒體） */
+    publisher: string | null;
 }
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -93,7 +95,8 @@ export function parseFeed(xml: string): RssItem[] {
             link: text(item.link).trim(),
             snippet: stripHtml(text(item.description ?? item['content:encoded'])),
             publishedAt: toDate(item.pubDate ?? item['dc:date']),
-            imageUrl: pickImage(item)
+            imageUrl: pickImage(item),
+            publisher: stripHtml(text(item.source)) || null
         }));
     }
 
@@ -108,7 +111,8 @@ export function parseFeed(xml: string): RssItem[] {
                 link: text(alternate?.['@_href'] ?? alternate).trim(),
                 snippet: stripHtml(text(entry.summary ?? entry.content)),
                 publishedAt: toDate(entry.published ?? entry.updated),
-                imageUrl: pickImage(entry)
+                imageUrl: pickImage(entry),
+                publisher: null
             };
         });
     }

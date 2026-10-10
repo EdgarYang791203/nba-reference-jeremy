@@ -21,10 +21,13 @@ export function fakeFetch(routes: Record<string, FakeRoute>, options: { onReques
     };
 }
 
-export function rssXml(items: Array<{ title: string; link: string; description?: string; pubDate: string }>): string {
+export function rssXml(items: Array<{ title: string; link: string; description?: string; pubDate: string; source?: string }>): string {
     const body = items
         .map(
-            (i) => `<item><title><![CDATA[${i.title}]]></title><link>${i.link}</link><description><![CDATA[${i.description ?? ''}]]></description><pubDate>${i.pubDate}</pubDate></item>`
+            (i) =>
+                `<item><title><![CDATA[${i.title}]]></title><link>${i.link}</link><description><![CDATA[${i.description ?? ''}]]></description><pubDate>${i.pubDate}</pubDate>${
+                    i.source ? `<source url="https://example.com">${i.source}</source>` : ''
+                }</item>`
         )
         .join('');
     return `<?xml version="1.0"?><rss version="2.0"><channel><title>t</title>${body}</channel></rss>`;

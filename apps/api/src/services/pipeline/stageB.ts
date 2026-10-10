@@ -18,6 +18,7 @@ export function buildBatchRequests(date: string, candidates: CandidateRow[], con
                 source: c.sourceName ?? '',
                 url: c.sourceUrl,
                 published: c.publishedAt ? c.publishedAt.toISOString() : null,
+                title: c.title,
                 text: (c.articleText ?? c.snippet ?? '').slice(0, config.articleMaxChars)
             }),
             maxTokens: 1500,

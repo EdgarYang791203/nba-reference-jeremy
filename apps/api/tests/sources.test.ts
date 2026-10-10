@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { googleNewsUrl, parseFeed } from '../src/sources/rss';
 import { extractArticle, extractFromHtmlString } from '../src/sources/extract';
 import { retry } from '../src/sources/retry';
-import { collectCandidates, isFresh, looksEnglish } from '../src/sources/candidates';
+import { collectCandidates, isFresh, looksEnglish, snippetUsable } from '../src/sources/candidates';
+import { decodeLegacyGoogleNewsId, parseBatchResponse, parseGoogleNewsId, resolveGoogleNewsUrl } from '../src/sources/googleNews';
 import { DEFAULT_CONFIG } from '@nba/shared';
 import { articleHtml, fakeFetch, rssXml } from './helpers/fetch';
 
@@ -67,7 +68,106 @@ describe('extract', () => {
     });
 });
 
+/** 新格式 id（AU_yqL…，無法離線解碼） */
+const GN_ID = 'CBMiiwFBVV95cUxOb3Vvc0ZYNVBHSlI5X2ZWOURHUTRFMU9EcG9jQ193dGEwdVBo';
+const GN_SHELL = '<html><body><c-wiz><div data-n-a-id="x" data-n-a-ts="1791650042" data-n-a-sg="AbIaSL_eBbYV"></div></c-wiz></body></html>';
+function batchBody(url: string): string {
+    const inner = JSON.stringify(['garturlres', url, '']);
+    return [")]}'", '', '123', JSON.stringify([['wrb.fr', 'Fbv4je', inner, null, null, null, 'generic']])].join('\n');
+}
+
+describe('googleNews', () => {
+    it('parseGoogleNewsId：rss/articles 與 articles 皆可，非 Google News 回 null', () => {
+        expect(parseGoogleNewsId(`https://news.google.com/rss/articles/${GN_ID}?oc=5`)).toBe(GN_ID);
+        expect(parseGoogleNewsId(`https://news.google.com/articles/${GN_ID}`)).toBe(GN_ID);
+        expect(parseGoogleNewsId('https://a.com/1')).toBeNull();
+    });
+
+    it('舊格式 id 離線解碼出原始 URL；新格式回 null', () => {
+        const url = 'https://example.com/story?x=1';
+        const payload = Buffer.from(url);
+        const bytes = Buffer.concat([Buffer.from([0x08, 0x13, 0x22, payload.length]), payload, Buffer.from([0xd2, 0x01, 0x00])]);
+        const id = bytes.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        expect(decodeLegacyGoogleNewsId(id)).toBe(url);
+        expect(decodeLegacyGoogleNewsId(GN_ID)).toBeNull();
+        expect(decodeLegacyGoogleNewsId('not-base64!!')).toBeNull();
+    });
+
+    it('parseBatchResponse 取 garturlres 的 URL', () => {
+        expect(parseBatchResponse(batchBody('https://pub.com/story'))).toBe('https://pub.com/story');
+        expect(parseBatchResponse('garbage')).toBeNull();
+    });
+
+    it('新格式：殼頁簽章 → batchexecute → 原始 URL；殼頁失敗回 null；非 Google News 原樣回傳', async () => {
+        const fetchFn = fakeFetch({
+            'https://news.google.com/articles/': GN_SHELL,
+            'https://news.google.com/_/DotsSplashUi/data/batchexecute': batchBody('https://pub.com/story')
+        });
+        expect(await resolveGoogleNewsUrl(fetchFn, `https://news.google.com/rss/articles/${GN_ID}?oc=5`)).toBe('https://pub.com/story');
+        expect(await resolveGoogleNewsUrl(fetchFn, 'https://a.com/x')).toBe('https://a.com/x');
+        expect(await resolveGoogleNewsUrl(fakeFetch({}), `https://news.google.com/rss/articles/${GN_ID}`)).toBeNull();
+        expect(await resolveGoogleNewsUrl(fakeFetch({ 'https://news.google.com/articles/': '<html>no sig</html>' }), `https://news.google.com/rss/articles/${GN_ID}`)).toBeNull();
+    });
+});
+
 describe('candidates', () => {
+    it('snippetUsable：過短或只是標題（Google News 的「標題 + 媒體名」）不可用', () => {
+        const title = 'Kyrie Irving gets cryptic when asked about retiring with Mavericks';
+        expect(snippetUsable(`${title} BasketNews.com`, title, 160)).toBe(false);
+        expect(snippetUsable('short', title, 160)).toBe(false);
+        expect(snippetUsable('A'.repeat(200), title, 160)).toBe(true);
+    });
+
+    it('Google News 連結還原：成功者換原始 URL + 媒體名並擷取；失敗者 failed 且不擷取', async () => {
+        const good = `https://news.google.com/rss/articles/${GN_ID}?oc=5`;
+        const bad = 'https://news.google.com/rss/articles/CBMiiwFBVV95cUxBQURfYmFk?oc=5';
+        const requests: string[] = [];
+        const fetchFn = fakeFetch(
+            {
+                'https://news.google.com/rss/search': rssXml([
+                    { title: 'LeBron James says he will keep playing', link: good, description: 'LeBron James says he will keep playing  Yahoo Sports', pubDate: 'Mon, 28 Sep 2026 05:00:00 GMT', source: 'Yahoo Sports' },
+                    { title: 'LeBron James injury update from the Lakers', link: bad, description: 'LeBron James injury update from the Lakers  ESPN', pubDate: 'Mon, 28 Sep 2026 05:00:00 GMT', source: 'ESPN' }
+                ]),
+                [`https://news.google.com/articles/${GN_ID}`]: GN_SHELL,
+                'https://news.google.com/_/DotsSplashUi/data/batchexecute': batchBody('https://pub.com/story'),
+                'https://pub.com/story': articleHtml('LeBron', LONG)
+            },
+            { onRequest: (url) => requests.push(url) }
+        );
+
+        const candidates = await collectCandidates({
+            players: [{ id: 1, name: 'LeBron James' }],
+            config: { ...DEFAULT_CONFIG, sources: [] },
+            fetch: fetchFn,
+            now: NOW,
+            retry: { delayMs: 0 },
+            logger: { warn: () => {} }
+        });
+
+        expect(candidates).toHaveLength(2);
+        const ok = candidates.find((c) => c.sourceUrl === 'https://pub.com/story')!;
+        expect(ok.sourceName).toBe('Yahoo Sports');
+        expect(ok.extractStatus).toBe('ok');
+        expect(ok.articleText).toContain('Paragraph 1');
+
+        const failed = candidates.find((c) => c.sourceUrl.startsWith('https://news.google.com/rss/articles/'))!;
+        expect(failed.extractStatus).toBe('failed');
+        expect(failed.articleText).toBeNull();
+        expect(requests.filter((u) => u.startsWith('https://news.google.com/rss/articles/'))).toHaveLength(0);
+
+        // googleNewsResolve=false：全部 failed、不打殼頁
+        requests.length = 0;
+        const off = await collectCandidates({
+            players: [{ id: 1, name: 'LeBron James' }],
+            config: { ...DEFAULT_CONFIG, sources: [], googleNewsResolve: false },
+            fetch: fetchFn,
+            now: NOW,
+            logger: { warn: () => {} }
+        });
+        expect(off.every((c) => c.extractStatus === 'failed')).toBe(true);
+        expect(requests.filter((u) => u.startsWith('https://news.google.com/articles/'))).toHaveLength(0);
+    });
+
     it('looksEnglish / isFresh', () => {
         expect(looksEnglish('LeBron James says he will keep playing')).toBe(true);
         expect(looksEnglish('詹姆斯談新賽季')).toBe(false);

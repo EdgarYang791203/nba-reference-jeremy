@@ -145,3 +145,29 @@ curl -X POST http://localhost:8787/jobs/daily/collect
 
 **P1 排在 P2 之前的理由**：目前 Google News 候選佔多數，不先解連結問題，P2 跑出來的品質數據會低估整條 pipeline，也會浪費 dev key 額度。
 **P4 的最小安全集**：素材頁本身公開不需 Access；A1 Access 只需保護 `/jobs/*` 以外的受保護路由，功能一階段可只設 Scheduler OIDC 與 origin header。
+
+## 2026-10-11 P1 完成紀錄
+
+- **Google News 連結還原**：新增 `apps/api/src/sources/googleNews.ts`（舊格式離線解碼；新格式 GET 殼頁取 `data-n-a-ts` / `data-n-a-sg` → POST batchexecute）。`config.googleNewsResolve=false` 可整個關閉（非官方介面失效時的開關）。
+- **extractStatus**：`run_candidates.extract_status`（migration `0001`）。`failed` 者不進階段 A/B，標 `rejected / no_text`。`POST /jobs/daily` 回傳與 log 多了 `extract: { ok, rssOnly, failed }`。
+- **來源名稱**：Google News 候選改用 RSS `<source>` 的媒體名（Yahoo Sports、ESPN…），不再顯示「Google News」。
+- **階段 B prompt**：`<article>` 多帶 `title` 屬性（擷取正文通常不含標題）。
+- **mock 文案**：`titleZh = [mock] + 原標題前 30 字`，`summaryZh` 前綴來源與原題，本地畫面可辨識。
+- **規格同步**：計畫書 4.4 步驟 4 已補兩個子項。
+- 測試：api `sources.test.ts` +5、`pipeline.test.ts` +1，全 workspace 144 綠。
+
+### 本地真實 RSS 實測（mock LLM，2026-10-11）
+
+| 項目 | 數字 |
+|---|---|
+| 候選（30+ 名單、36h、去重後） | 175 |
+| 擷取到正文 ok | 136 |
+| 僅 RSS 摘要可用 rss_only | 2 |
+| 無可用文字 failed（不進階段 A/B） | 37 |
+| Google News 還原失敗 | 0 |
+| 入庫素材 | 20（標題 20 種、19 篇有圖、20 篇有引述） |
+
+37 篇 failed 全是媒體站擋機器人／付費牆導致正文擷取失敗、摘要又只有標題，依新規則正確剔除。
+對照 9/29 實測：當時 Google News 來源幾乎全部只剩標題。
+
+**P2 前置已就緒**：切 `LLM_PROVIDER=anthropic` + dev key 即可在本地跑真實階段 A/B。
