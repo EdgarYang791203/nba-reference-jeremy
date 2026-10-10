@@ -2,6 +2,7 @@
  * `pnpm seed`：讀 seed/players-2026.json，以 (name, team) upsert 到 players（計畫書 4.5）。
  * 需要 DATABASE_URL（本地一律 Neon dev branch）。
  */
+import '../src/load-env';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';

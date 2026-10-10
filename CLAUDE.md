@@ -28,7 +28,8 @@ pnpm audit --audit-level high   # CI 必跑
 pnpm seed         # seed/players-2026.json → players（需 DATABASE_URL）
 ```
 
-本地無 Neon 時：在 `apps/api` 用 `DATABASE_URL=pglite://./.data/dev`（啟動自動 migrate）+ `LLM_PROVIDER=mock`，
+環境變數寫在 `apps/api/.env`（或根目錄 `.env`），`pnpm dev` / `pnpm seed` / `db:migrate` 會自動載入（`src/load-env.ts`，已存在的變數不覆蓋）。
+本地無 Neon 時：`DATABASE_URL=pglite://./.data/dev`（啟動自動 migrate）+ `LLM_PROVIDER=mock`，
 `pnpm seed` → `POST /jobs/daily` → `POST /jobs/daily/collect` 即可在 `/materials` 看到真資料。
 前端不接 API 時用 `NUXT_PUBLIC_USE_MOCK_API=true`。
 

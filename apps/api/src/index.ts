@@ -1,3 +1,4 @@
+import './load-env';
 import { serve } from '@hono/node-server';
 import { createApp } from './app';
 import { readEnv } from './env';
