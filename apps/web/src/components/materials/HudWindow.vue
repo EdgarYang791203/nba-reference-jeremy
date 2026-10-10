@@ -6,7 +6,6 @@
   @param rows - { key, value, tone?: 'ok'|'value'|'muted', bar?: { percent, color } }[]
 -->
 <script setup lang="ts">
-import { ref, watchPostEffect } from 'vue';
 import RpgWindow from '~/components/ui/RpgWindow.vue';
 
 export interface HudRow {
@@ -16,7 +15,7 @@ export interface HudRow {
     bar?: { percent: number; color: 'gold' | 'sp' | 'hp' };
 }
 
-const props = defineProps<{
+defineProps<{
     title: string;
     rows: HudRow[];
     status?: 'ok' | 'idle' | 'error';
@@ -29,20 +28,15 @@ const toneClass: Record<NonNullable<HudRow['tone']>, string> = {
     error: 'text-hp'
 };
 
-const barRefs = ref<HTMLElement[]>([]);
-watchPostEffect(() => {
-    props.rows.forEach((row, index) => {
-        const el = barRefs.value[index];
-        if (el && row.bar) {
-            el.style.setProperty('width', `${Math.max(0, Math.min(100, row.bar.percent))}%`);
-        }
-    });
-});
+/** 條寬以 SVG <rect width="n%"> 繪製（屬性非 inline style），SSR 即有寬度，hydration 後不會從 0 長出 */
+function barPercent(percent: number): number {
+    return Math.max(0, Math.min(100, percent));
+}
 </script>
 
 <template>
     <RpgWindow :title="title" :status="status ?? 'ok'" body-class="flex flex-col gap-1.5 px-3.5 py-3 font-mono text-xs">
-        <template v-for="(row, index) in rows" :key="row.key">
+        <template v-for="row in rows" :key="row.key">
             <div class="flex justify-between gap-3">
                 <span class="text-muted">{{ row.key }}</span>
                 <span :class="toneClass[row.tone ?? 'value']">{{ row.value }}</span>
@@ -56,19 +50,19 @@ watchPostEffect(() => {
                 :aria-valuemax="100"
                 :aria-label="row.key"
             >
-                <div
-                    :ref="
-                        (el) => {
-                            barRefs[index] = el as HTMLElement;
-                        }
-                    "
-                    class="h-1 w-0"
-                    :class="{
-                        'bg-gold': row.bar.color === 'gold',
-                        'bg-sp': row.bar.color === 'sp',
-                        'bg-hp': row.bar.color === 'hp'
-                    }"
-                />
+                <svg class="block h-1 w-full" preserveAspectRatio="none" aria-hidden="true">
+                    <rect
+                        x="0"
+                        y="0"
+                        :width="`${barPercent(row.bar.percent)}%`"
+                        height="100%"
+                        :class="{
+                            'fill-gold': row.bar.color === 'gold',
+                            'fill-sp': row.bar.color === 'sp',
+                            'fill-hp': row.bar.color === 'hp'
+                        }"
+                    />
+                </svg>
             </div>
         </template>
         <slot />

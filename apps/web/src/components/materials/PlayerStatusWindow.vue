@@ -20,7 +20,8 @@ const props = defineProps<{
     stats: {
         hot: number;
         hotMax: number;
-        unread: number;
+        /** null = 尚未就緒（NEW 判定需 localStorage，mount 後才有），StatBar 顯示 `--` */
+        unread: number | null;
         unreadMax: number;
         total: number;
         recent: number;

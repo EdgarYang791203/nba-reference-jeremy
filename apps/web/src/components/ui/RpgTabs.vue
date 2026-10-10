@@ -30,7 +30,7 @@ const emit = defineEmits<{
             type="button"
             role="tab"
             :aria-selected="tab.key === modelValue"
-            class="inline-flex items-center gap-2 border-2 px-4 py-2 text-sm font-bold leading-none transition-colors"
+            class="relative inline-flex items-center gap-2 border-2 px-4 py-2 text-sm font-bold leading-none transition-colors"
             :class="
                 tab.key === modelValue
                     ? 'border-gold bg-gold text-on-gold shadow-tab'
@@ -43,7 +43,10 @@ const emit = defineEmits<{
             <span v-if="tab.count !== undefined" class="font-press text-[9px]" data-testid="tab-count">
                 {{ tab.count }}
             </span>
-            <slot name="badge" :tab="tab" />
+            <!-- badge 絕對定位在右上角：mount 後才出現的 NEW（localStorage）不會撐寬頁籤、不造成整排位移 -->
+            <span class="pointer-events-none absolute -right-1.5 -top-1.5 flex">
+                <slot name="badge" :tab="tab" />
+            </span>
         </button>
     </div>
 </template>

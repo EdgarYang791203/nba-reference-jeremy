@@ -37,13 +37,23 @@ const dateLabel = computed(() => formatDate(props.material.publishedAt ?? props.
         @click="emit('open', material)"
     >
         <div class="thumb relative aspect-video overflow-hidden border-b-2 border-line-2 bg-panel-2">
+            <!-- 圖片到達前的文字佔位（SSR 即輸出）；<img> 絕對定位疊在上面，載入完成即蓋住，不需 JS 狀態 -->
+            <div
+                class="absolute inset-0 flex flex-col items-center justify-center gap-1 px-4 text-center font-mono text-[11px] text-muted"
+                aria-hidden="true"
+            >
+                <span class="font-press text-[9px] text-gold">LOADING_</span>
+                <span class="line-clamp-2">{{ material.sourceName ?? '' }}</span>
+            </div>
+            <!-- 首列（前 4 張）eager + 高優先；其餘 lazy，避免一次抓 20 張外連圖 -->
             <BaseImage
                 :src="material.imageUrl"
                 :fallback-src="fallbackSrc"
                 :alt="material.titleZh"
                 pixel-fallback
                 class="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
+                :loading="(thumbIndex ?? 99) < 4 ? 'eager' : 'lazy'"
+                :fetchpriority="(thumbIndex ?? 99) < 4 ? 'high' : 'auto'"
             />
             <div class="absolute left-2.5 top-2.5 flex gap-1.5">
                 <RpgTag v-if="team" :team="team">{{ team }}</RpgTag>

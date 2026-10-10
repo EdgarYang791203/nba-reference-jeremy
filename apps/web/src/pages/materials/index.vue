@@ -103,7 +103,8 @@ const scopeMaterials = computed(() =>
 
 const stats = computed(() => {
     const recent = scopeMaterials.value.filter((m) => isWithinDays(m.createdAt, 3)).length;
-    const unread = badgeLoaded.value ? scopeMaterials.value.filter(isMaterialNew).length : 0;
+    // 未載入 localStorage 前給 null → StatBar 顯示 `--`（SSR 與 client 首次渲染一致，mount 後才換成實際數）
+    const unread = badgeLoaded.value ? scopeMaterials.value.filter(isMaterialNew).length : null;
     return {
         hot: recent,
         hotMax: 20,
