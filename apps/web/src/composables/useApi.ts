@@ -21,7 +21,14 @@ export function useApi(): Api {
     const http: HttpClient = createHttp<RequestContext>({
         baseURL: import.meta.server ? config.public.apiBase : config.public.apiClientBase,
         hooks: {
-            onLoading: (loading) => store.globalLoadingHandler(loading),
+            // SSR 不計 loading：Vue SSR 會在 page 的 async setup 還在等待時先渲染 layout 其他子節點（GlobalLoading），
+            // 計數 > 0 會把遮罩寫進 HTML → hydration mismatch，且畫面在 hydration 完成前被遮罩壓暗、不能點
+            onLoading: (loading) => {
+                if (import.meta.server) {
+                    return;
+                }
+                store.globalLoadingHandler(loading);
+            },
             getContext: () => ({ path: route.fullPath }),
             onError: (error, context) => {
                 if (import.meta.server) {

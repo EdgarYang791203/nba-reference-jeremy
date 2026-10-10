@@ -88,7 +88,7 @@ const fallbackSrc = computed(() => `/pixel/thumb-${((props.material?.id ?? 0) % 
                         :fallback-src="fallbackSrc"
                         :alt="material.titleZh"
                         class="block aspect-video w-full object-cover"
-                        pixel
+                        pixel-fallback
                     />
                 </div>
 

@@ -41,7 +41,7 @@ const dateLabel = computed(() => formatDate(props.material.publishedAt ?? props.
                 :src="material.imageUrl"
                 :fallback-src="fallbackSrc"
                 :alt="material.titleZh"
-                pixel
+                pixel-fallback
                 class="absolute inset-0 h-full w-full object-cover"
                 loading="lazy"
             />

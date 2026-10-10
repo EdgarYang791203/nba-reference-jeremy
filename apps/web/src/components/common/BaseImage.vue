@@ -5,7 +5,8 @@
   @param src - 圖片來源（素材圖皆為外連 URL）
   @param alt - 替代文字
   @param fallbackSrc - 載入失敗時的替補圖（如 /pixel/thumb-shot-neon-610.jpg）
-  @param pixel - 是否為像素素材（套 image-rendering: pixelated）
+  @param pixel - src 本身為像素素材（套 image-rendering: pixelated）
+  @param pixelFallback - 只有 fallbackSrc 是像素素材；外連照片不套 pixelated（照片縮小用 nearest-neighbor 會鋸齒且較耗繪製）
 -->
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
@@ -15,6 +16,7 @@ const props = defineProps<{
     alt?: string;
     fallbackSrc?: string;
     pixel?: boolean;
+    pixelFallback?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -35,13 +37,17 @@ const normalizedSrc = computed(() => {
     return '';
 });
 
+const showingFallback = computed(() => usingFallback.value || !normalizedSrc.value);
+
 const resolvedSrc = computed(() => {
     // 無外連圖或外連圖失敗 → 走像素底圖（9E.3）
-    if (usingFallback.value || !normalizedSrc.value) {
+    if (showingFallback.value) {
         return props.fallbackSrc ?? '';
     }
     return normalizedSrc.value;
 });
+
+const isPixel = computed(() => props.pixel || (props.pixelFallback && showingFallback.value));
 
 function handleFailure(event?: Event) {
     if (!usingFallback.value && props.fallbackSrc) {
@@ -101,7 +107,7 @@ function onError(event: Event) {
         ref="imageRef"
         :src="resolvedSrc"
         :alt="alt"
-        :class="{ 'pixel-asset': pixel }"
+        :class="{ 'pixel-asset': isPixel }"
         decoding="async"
         @load="onLoad"
         @error="onError"
