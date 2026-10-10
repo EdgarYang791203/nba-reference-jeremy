@@ -5,6 +5,8 @@ const apiBase = process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8787';
 
 export default defineNuxtConfig({
     srcDir: 'src',
+    // Nuxt 4 的 public/ 與 server/ 預設相對於 rootDir（不隨 srcDir），本專案維持放在 src/ 下
+    dir: { public: 'src/public' },
     compatibilityDate: '2025-07-15',
 
     modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@element-plus/nuxt'],
