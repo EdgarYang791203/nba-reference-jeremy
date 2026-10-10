@@ -3,7 +3,7 @@
  * 只換 :root[data-theme] 的變數表（tokens.css），標記不變。
  * SSR 一律 dark；client mount 後讀 localStorage 再套用（app.head 內另有 inline script 先套一次避免閃爍）。
  */
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 
 export type Theme = 'dark' | 'light';
 
@@ -28,7 +28,16 @@ function readStoredTheme(): Theme | null {
 }
 
 export function useTheme() {
-    const theme = useState<Theme>('theme', () => 'dark');
+    // SSR 一律 dark；client 第一次建立 state 時直接讀 localStorage，避免 hydration 後被 head htmlAttrs 蓋回 dark
+    const theme = useState<Theme>('theme', () => (import.meta.client ? (readStoredTheme() ?? 'dark') : 'dark'));
+
+    // html 的 data-theme / class 交給 unhead 依 state 渲染（nuxt.config 不再寫死），切換時同步更新
+    useHead({
+        htmlAttrs: {
+            'data-theme': computed(() => theme.value),
+            class: computed(() => (theme.value === 'dark' ? 'dark' : ''))
+        }
+    });
 
     function setTheme(next: Theme) {
         theme.value = next;

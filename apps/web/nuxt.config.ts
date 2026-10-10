@@ -19,7 +19,8 @@ export default defineNuxtConfig({
 
     app: {
         head: {
-            htmlAttrs: { lang: 'zh-Hant-TW', 'data-theme': 'dark', class: 'dark' },
+            // data-theme / class 由 composables/useTheme.ts 的 useHead 依 state 渲染（SSR 預設 dark）
+            htmlAttrs: { lang: 'zh-Hant-TW' },
             title: 'NBA 素材站',
             meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
             // 首屏前先套 localStorage 的主題，避免亮版使用者看到暗版閃一下（composables/useTheme.ts 之後接手）

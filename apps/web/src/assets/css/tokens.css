@@ -34,32 +34,38 @@
     color-scheme: dark;
 }
 
+/*
+ * 亮版（2026-10-11 依 Hank 提供的活動視窗參考圖調整）：暖米色紙面 + 深咖啡硬線 + 南瓜橘強調。
+ * 頁面底 = 淺褐紙（--c-bg），卡片 = 奶油色（--c-panel），列底 = 較深奶油（--c-panel-2），
+ * 深色 head 列 / 邊線 / 硬陰影一律深咖啡，gold 改為橘（按鈕、標籤、進度條），文字深咖啡。
+ * 與 Design System tokens.json「日間球場」色票不同，待回寫 tokens.json。
+ */
 :root[data-theme='light'] {
-    --c-bg: #f4f1ea;
-    --c-panel: #ffffff;
-    --c-panel-2: #efeae0;
-    --c-head: #1a1f2b;
-    --c-border: #1a1f2b;
-    --c-border-2: #d8d2c4;
-    --c-cream: #1a1f2b;
-    --c-muted: #5e6470;
-    --c-gold: #e09b00;
-    --c-orange: #ff6b00;
+    --c-bg: #e9d8c0;
+    --c-panel: #f7eddc;
+    --c-panel-2: #efe1cb;
+    --c-head: #2b2420;
+    --c-border: #2b2420;
+    --c-border-2: #cbb393;
+    --c-cream: #2b2420;
+    --c-muted: #6f5f52;
+    --c-gold: #f08c3a;
+    --c-orange: #e0661d;
     --c-hp: #d9483b;
-    --c-sp: #2a7fb8;
-    --c-tag-blue: #2a7fb8;
-    --c-tag-brown: #4a3b29;
-    --c-track: #e6e0d3;
-    --c-shadow-hard: #1a1f2b;
-    --c-grid-line: #e4ded2;
-    --c-highlight: #b87f00;
-    --c-glow: rgb(224 155 0 / 0.13);
-    --c-glow-strong: rgb(224 155 0 / 0.35);
+    --c-sp: #4a86a8;
+    --c-tag-blue: #4a86a8;
+    --c-tag-brown: #5a4330;
+    --c-track: #d6c1a3;
+    --c-shadow-hard: #2b2420;
+    --c-grid-line: #dfcbaf;
+    --c-highlight: #c9651b;
+    --c-glow: rgb(240 140 58 / 0.18);
+    --c-glow-strong: rgb(240 140 58 / 0.4);
 
-    --c-on-gold: #1a1f2b;
-    --c-on-head: #f4f1ea;
+    --c-on-gold: #2b2420;
+    --c-on-head: #f7eddc;
     --c-on-tag-blue: #ffffff;
-    --c-on-tag-brown: #fffbf2;
+    --c-on-tag-brown: #f7eddc;
 
     color-scheme: light;
 }
